@@ -1,0 +1,27 @@
+# A PegJS parser for Kicad Modules
+
+## Usage
+
+```ts
+import { parse } from "kicad-module-parser"
+parse(some_kicad_module)
+```
+
+## Testing
+
+```sh
+# install dev depenencies
+yarn
+
+# create the data directory
+mkdir data
+pushd data
+
+# clone your favorite Kicad Libraries into the data directory
+git clone  https://github.com/Digi-Key/digikey-kicad-library.git
+git clone  https://github.com/KiCad/kicad-footprints.git
+popd
+
+# parse all the modules an error out if one of them fails to parse
+node test
+```

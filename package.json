@@ -1,0 +1,20 @@
+{
+    "name": "kicad-module-parser",
+    "version": "1.0.0",
+    "main": "module-parser.js",
+    "author": "Jason Thorpe",
+    "license": "MIT",
+    "scripts": {
+        "build": "npx pegjs -o module-parser.js ./module.pegjs ",
+        "test": "node test.js"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^9.0.1",
+        "@types/klaw": "^3.0.1",
+        "@types/through2": "^2.0.36",
+        "fs-extra": "^9.0.1",
+        "klaw": "^3.0.0",
+        "pegjs": "^0.10.0",
+        "through2": "^4.0.2"
+    }
+}
