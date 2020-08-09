@@ -863,7 +863,10 @@ function peg$parse(input, options) {
           if (s4 !== peg$FAILED) {
             s5 = peg$parse_();
             if (s5 !== peg$FAILED) {
-              s6 = peg$parsesymbol();
+              s6 = peg$parsestring();
+              if (s6 === peg$FAILED) {
+                s6 = peg$parsesymbol();
+              }
               if (s6 !== peg$FAILED) {
                 s7 = peg$parse_();
                 if (s7 !== peg$FAILED) {
@@ -3565,15 +3568,18 @@ function peg$parse(input, options) {
           if (s0 === peg$FAILED) {
             s0 = peg$parselayers();
             if (s0 === peg$FAILED) {
-              s0 = peg$parsecommon_numeric();
+              s0 = peg$parsetstamp();
               if (s0 === peg$FAILED) {
-                s0 = peg$parsecommon_int();
+                s0 = peg$parsecommon_numeric();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parsepad_numeric();
+                  s0 = peg$parsecommon_int();
                   if (s0 === peg$FAILED) {
-                    s0 = peg$parseoptions();
+                    s0 = peg$parsepad_numeric();
                     if (s0 === peg$FAILED) {
-                      s0 = peg$parseprimitives();
+                      s0 = peg$parseoptions();
+                      if (s0 === peg$FAILED) {
+                        s0 = peg$parseprimitives();
+                      }
                     }
                   }
                 }

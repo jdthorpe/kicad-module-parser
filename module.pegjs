@@ -1,5 +1,5 @@
 module  /* parseMODULE_unchecked */ 
-    = _  "(" _ "module"  _ name:symbol  _ contents:( module_contents _ )* ")" _  {
+    = _  "(" _ "module"  _ name:(string/symbol)  _ contents:( module_contents _ )* ")" _  {
         return {
             type: "module",
             value: [
@@ -258,6 +258,7 @@ pad_attr
     / rect_delta
     / drill
     / layers
+    / tstamp
     // net  // not relvant for modules
     / common_numeric // / solder_mask_margin / solder_paste_margin / solder_paste_ratio / clearance / thermal_width / thermal_gap
     / common_int // / autoplace_cost90 / autoplace_cost180 / zone_connect
