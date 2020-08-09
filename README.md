@@ -22,6 +22,6 @@ git clone  https://github.com/Digi-Key/digikey-kicad-library.git
 git clone  https://github.com/KiCad/kicad-footprints.git
 popd
 
-# parse all the modules an error out if one of them fails to parse
-node test
+# parse all the modules and error out if one of them fails to parse
+node test.js
 ```
