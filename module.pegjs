@@ -117,11 +117,13 @@ justify = "(" _ "justify" _ justify: (JUSTIFY _ )* ")" {
 }
 
 JUSTIFY
-    = "left"
+    = value:("left"
     / "right"
     / "top"
     / "bottom"
-    / "mirror";
+    / "mirror") {
+        return {type:"string",value}
+    };
 
 hide = "hide" { return { type:"hide"}}
 
