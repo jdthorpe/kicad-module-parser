@@ -124,7 +124,7 @@ var process_pad = function (pad) {
                 break;
             case "layer":
             case "layers":
-                out.layers = attr.value;
+                out.layers = reduce_strings(attr.value);
                 break;
             // floats
             case "solder_mask_margin":

@@ -130,7 +130,7 @@ const process_pad = (pad: node): pad => {
                 break;
             case "layer":
             case "layers":
-                out.layers = attr.value;
+                out.layers = reduce_strings(attr.value as node[]);
                 break;
 
             // floats
