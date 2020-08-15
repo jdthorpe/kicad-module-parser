@@ -106,7 +106,7 @@ interface common_attribures {
     zone_connect?: number;
 }
 
-interface module extends common_attribures {
+interface kicad_module extends common_attribures {
     attributes?: string[];
     at?: at;
     descr?: string;

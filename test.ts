@@ -16,11 +16,12 @@ walk("./data")
         })
     )
     .on("data", (item) => {
-        const mod:string = fse.readFileSync( item.path).toString();
-        try{
+        const mod: string = fse.readFileSync(item.path).toString();
+        try {
             parse(mod);
-        }catch (err) {
-            console.log(err)
-            console.log(`falied to parse module ${item.path}`)
-            process.exit()
-        });
+        } catch (err) {
+            console.log(err);
+            console.log(`falied to parse module ${item.path}`);
+            process.exit();
+        }
+    });
