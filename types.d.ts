@@ -29,24 +29,29 @@ interface fp_generic {
     status?: string;
 }
 
-interface fp_arc extends fp_generic {
+export interface fp_arc extends fp_generic {
+    type: "fp_arc";
     center: [number, number];
 }
-interface fp_circle extends fp_generic {
+export interface fp_circle extends fp_generic {
+    type: "fp_circle";
     center: [number, number];
     end: [number, number];
 }
-interface fp_curve extends fp_generic {
+export interface fp_curve extends fp_generic {
+    type: "fp_curve";
     start: [number, number];
     control1: [number, number];
     control2: [number, number];
     end: [number, number];
 }
-interface fp_line extends fp_generic {
+export interface fp_line extends fp_generic {
+    type: "fp_line";
     start: [number, number];
     end: [number, number];
 }
-interface fp_poly extends fp_generic {
+export interface fp_poly extends fp_generic {
+    type: "fp_poly";
     points: [number, number][];
 }
 

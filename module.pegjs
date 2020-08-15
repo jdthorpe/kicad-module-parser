@@ -197,7 +197,7 @@ fp_text
 fp_arc
     =  "(" _ "fp_arc" _ start:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
         return {
-            type: "fp_line",
+            type: "fp_arc",
             value: [ start, end,angle, ...generics ]
         };
     }
@@ -205,7 +205,7 @@ fp_arc
 fp_circle
     =  "(" _ "fp_circle" _  center:center _ end:end _  generics:fp_generics _ ")" {
         return {
-            type: "fp_line",
+            type: "fp_circle",
             value: [ center, end, ...generics ]
         };
     }
