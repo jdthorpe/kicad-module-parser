@@ -202,10 +202,13 @@ var process_fp_text_effects = function (text) {
                 if ("size" in font)
                     font.size = combine(font.size);
                 out.font = font;
+                break;
             case "justify":
                 out.justify = reduce_strings(attr.value);
+                break;
             case "hide":
                 out.hide = true;
+                break;
         }
     }
     return out;

@@ -217,11 +217,13 @@ const process_fp_text_effects = (text: node): text_effects => {
                 let font = combine(attr.value as node[]);
                 if ("size" in font) font.size = combine(font.size);
                 out.font = font;
-
+                break;
             case "justify":
                 out.justify = reduce_strings(attr.value as node[]) as JUSTIFY[];
+                break;
             case "hide":
                 out.hide = true;
+                break;
         }
     }
     return out;
