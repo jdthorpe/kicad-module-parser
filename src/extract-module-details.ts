@@ -1,7 +1,7 @@
 import { parse } from "../module-parser";
 
-export function parse_module(x: string): module {
-    const module_data: module = {
+export function parse_module(x: string): kicad_module {
+    const module_data: kicad_module = {
         pads: [],
         text: [],
         shapes: [],
