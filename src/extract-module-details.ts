@@ -214,7 +214,10 @@ const process_fp_text_effects = (text: node): text_effects => {
     for (const attr of attrs) {
         switch (attr.type) {
             case "font":
-                out.font = combine(attr.value as node[]);
+                let font = combine(attr.value as node[]);
+                if ("size" in font) font.size = combine(font.size);
+                out.font = font;
+
             case "justify":
                 out.justify = reduce_strings(attr.value as node[]) as JUSTIFY[];
             case "hide":

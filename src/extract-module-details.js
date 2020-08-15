@@ -198,7 +198,10 @@ var process_fp_text_effects = function (text) {
         var attr = attrs_3[_i];
         switch (attr.type) {
             case "font":
-                out.font = combine(attr.value);
+                var font = combine(attr.value);
+                if ("size" in font)
+                    font.size = combine(font.size);
+                out.font = font;
             case "justify":
                 out.justify = reduce_strings(attr.value);
             case "hide":
