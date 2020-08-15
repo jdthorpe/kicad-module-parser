@@ -2,6 +2,15 @@
 
 ## Usage
 
+User friendly data
+
+```ts
+import { parse_module } from "kicad-module-parser"
+parse_module(some_kicad_module)
+```
+
+The underlying parser
+
 ```ts
 import { parse } from "kicad-module-parser"
 parse(some_kicad_module)
