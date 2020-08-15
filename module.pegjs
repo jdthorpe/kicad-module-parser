@@ -1,9 +1,9 @@
 module  /* parseMODULE_unchecked */ 
-    = _  "(" _ "module"  _ name:(string/symbol)  _ contents:( module_contents _ )* ")" _  {
+    = _  "(" _ "module"  _ value:(string/symbol)  _ contents:( module_contents _ )* ")" _  {
         return {
             type: "module",
             value: [
-                {type: "name", value:name },
+                {type: "name", value},
                 ...contents.map(x=>x[0])
             ]
         }
@@ -16,7 +16,7 @@ module_contents
     / layer
     / tedit 
     / tstamp
-    / at_with_angle
+    / at
     / descr
     / tags
     / path 
@@ -41,7 +41,7 @@ placed  = "placed"{ return { type: "placed"}}
 // ----------------------------------------
 // ----------------------------------------
 
-layer = "(" _ "layer" _ layers:($LAYER _)* ")" { 
+layer = "(" _ "layer" _ layers:(LAYER _)* ")" { 
     return { 
         type:"layer", 
         value:layers.map(x => x[0])
@@ -49,7 +49,7 @@ layer = "(" _ "layer" _ layers:($LAYER _)* ")" {
 }
 
 LAYER  
-    = "B.Adhes"
+    = value:("B.Adhes"
      /"F.Adhes"
      /"B.Paste"
      /"F.Paste"
@@ -66,7 +66,9 @@ LAYER
      /"Eco1.User"
      /"Eco2.User"
      /"Edge.Cuts"
-     / CU_LAYER;
+     / CU_LAYER) {
+        return { type: "string", value} 
+    }
 
 // ----------------------------------------
 // ----------------------------------------
@@ -90,7 +92,7 @@ effects
     }
 
 font 
-    = "(" _ "font" _ attrs:(( size_hw/thickness/bold/italic) _ )* ")" {
+    = "(" _ "font" _ attrs:(( size/thickness/bold/italic) _ )* ")" {
         return { 
             type:"font", 
             value: attrs.map(x => x[0]) 
@@ -152,10 +154,10 @@ COMMON_INT
     / "autoplace_cost180"
 
 module_attr 
-    =   "(" _ "attr" _ attr:("smd"/"virtual") _ ")" {
+    =   "(" _ "attr" _ value:("smd"/"virtual") _ ")" {
         return  {
-            type: "attr",
-            value: attr
+            type: "module_attribute",
+            value: {type:"string",value}
         }
 }
 
@@ -166,10 +168,21 @@ module_attr
 // parseTEXTE_MODULE
 
 fp_text
-    = "("_ "fp_text" _ type:("reference"/"value"/"user") _ value:(string/symbol/number) _  at:at_with_angle?  _ attrs:((layer/hide/effects) _)* ")" {
+    = "("_ "fp_text" _ type:("reference"/"value"/"user") _ value:(string/symbol/number) _  at:at?  _ attrs:((layer/hide/effects) _)* ")" {
         return { 
             type:"fp_text", 
-            value: [ value, at, attrs.map(x => x[0])] 
+            value: [ 
+                {type:"value",value},
+                { 
+                    type: "text_type",
+                    value: {
+                        type:"string",
+                        value: type
+                        }
+                    },
+                 at, 
+                 ...attrs.map(x => x[0])
+                 ] 
         }
     }
 
@@ -215,7 +228,7 @@ fp_poly
     =  "(" _ "fp_poly" _  pts:pts _   generics:fp_generics ")" {
         return {
             type: "fp_poly",
-            value: [ pts, , ...generics ]
+            value: [ pts , ...generics ]
         };
     }
 
@@ -232,7 +245,7 @@ pad
     = "(" _ "pad" _ no:(string/symbol)? _ type:pad_type _ shape:pad_shape _ attrs:(pad_attr _)* ")" { 
         return { 
             type: "pad",
-            value: [ {type: "pad_number", value:no }, type, shape, ...attrs.map(x => x[0]) ]
+            value: [ {type: "pad_id", value:no }, type, shape, ...attrs.map(x => x[0]) ]
         } 
     }
 
@@ -253,8 +266,8 @@ pad_shape
     }
 
 pad_attr 
-    = size_hw
-    / at_with_angle
+    = size
+    / at
     / rect_delta
     / drill
     / layers
@@ -264,22 +277,25 @@ pad_attr
     / common_int // / autoplace_cost90 / autoplace_cost180 / zone_connect
     / pad_numeric
     // skipping chamfer, property
-    / options
+    / pad_options
     / primitives;
 
-size_hw 
+size 
     = "(" _ "size" _ height:number _ width:number _ ")" { 
         return { 
-            type:" size", 
-            value:  { height, width } 
+           type: "size", 
+            value:  [ 
+                {type:"height",value:height},
+                {type:"width",value:width},
+                ] 
             } 
     }
 
-at_with_angle 
-    = "(" _ "at" _ height:number _ width:number _ angle:(number _)? unlocked:("unlocked" _)?")" { 
-        var value = [ 
-            { type: "height", value:height }, 
-            { type: "width", value:width }, 
+at 
+    = "(" _ "at" _ x:number _ y:number _ angle:(number _)? unlocked:("unlocked" _)?")" { 
+        var value = [
+            { type: "x", value:x }, 
+            { type: "y", value:y }, 
         ]
         if(angle !== null) value.push( { type: "width", value:angle[0] } ) 
         if(unlocked !== null) value.push( { type: "unlocked" } ) 
@@ -300,16 +316,16 @@ drill
         var out = {}
         for(const ATTR of attrs){
             var attr = ATTR[0]
-            if("number" in attr ){
-                out.drill_height = attr.number
-                if(!("drill_width" in out)){
-                    out.drill_width = attr.number
+            if(attr.type == "number" ){
+                out.height = attr.value
+                if(!("width" in out)){
+                    out.width = attr.value
                 }
             }else{
                 Object.assign(out, attr)
             }
         }
-        return { drill:out }
+        return { type:"drill",value:out }
     }
 
 oval =  "oval" { return { type: "oval"}}
@@ -339,7 +355,7 @@ PAD_NUMERIC
 // pad options
 // --------------------------------------------------
 
-options  /* parseD_PAD_option */ 
+pad_options  /* parseD_PAD_option */ 
     = "(" _ "options"  _ value:((option_anchor/option_clearance) _ )*  ")" {
         return { type:"anchor", value:value.map(x=>x[0]) }
     }
@@ -400,7 +416,7 @@ gr_curve
 curve_points
     = "(" _ "pts" _ start:xy _ control1:xy _ control2:xy _ end:xy  _ ")" {
         return {
-            type: "pts",
+            type: "curve_points",
             value: [
                 { type:"start", value:start },
                 { type:"control1", value:control1 },
@@ -437,12 +453,12 @@ status = "(" _ "status" _  value:hex _ ")" {
 
 width 
     = "(" _ "width" _  width:number _ ")" {
-        return { type:" width", value:width } 
+        return { type:"width", value: width } 
     }
 
 angle 
     = "(" _ "angle"  _ angle:number _ ")" {
-        return { type:"angle", value:angle }
+        return { type:"angle", value: angle }
     }
 
 _start 
@@ -501,8 +517,8 @@ xyz =   "(" _ "xyz" _ x:number _ y:number _ z:number _  ")" { return { type:"xyz
 // --------------------------------------------------
 
 string
-  = '"' chars:DoubleStringCharacter* '"' { return chars.join(''); }
-  / "'" chars:SingleStringCharacter* "'" { return chars.join(''); }
+  = '"' chars:DoubleStringCharacter* '"' { return {type:"string",value:chars.join('')}; }
+  / "'" chars:SingleStringCharacter* "'" { return {type:"string",value:chars.join('')}; }
 
 DoubleStringCharacter
   = !('"' / "\\") char:. { return char; }
@@ -540,17 +556,18 @@ array
 
 
 symbol 
-   = $([^ ();'\n]+)
+   = value:$([^ ();'\n]+) {
+       return {type:"string",value}
+
+   }
 
 _ "whitespace"
   = [ \t\n\r]*
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number
-    = sign:[-+]?val:(Real/Fraction/digits) {
-        if(sign)
-            val.sign=sign
-        return val
+    = val:$([-+]?  (Real/Fraction/digits)) {
+        return { type:"number", value:val }
     }
 
 Real
@@ -595,6 +612,6 @@ LAYER_MASKS
     / "Inner1"[01-4]".Cu"
 
 LAYERS
-    = LAYER
-    / CU_LAYER
-    / LAYER_MASKS
+    = value:(LAYER / CU_LAYER / LAYER_MASKS) {
+        return { type: "string", value} 
+    }
