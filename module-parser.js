@@ -342,7 +342,7 @@ function peg$parse(input, options) {
       peg$c139 = peg$literalExpectation("fp_arc", false),
       peg$c140 = function(start, end, angle, generics) {
               return {
-                  type: "fp_line",
+                  type: "fp_arc",
                   value: [ start, end,angle, ...generics ]
               };
           },
@@ -350,7 +350,7 @@ function peg$parse(input, options) {
       peg$c142 = peg$literalExpectation("fp_circle", false),
       peg$c143 = function(center, end, generics) {
               return {
-                  type: "fp_line",
+                  type: "fp_circle",
                   value: [ center, end, ...generics ]
               };
           },
