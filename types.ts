@@ -14,8 +14,8 @@ export type pad_shape =
 export type pad_type = "thru_hole" | "np_thru_hole" | "smd" | "connect";
 
 export interface size {
-    height: string;
-    width: string;
+    height: number;
+    width: number;
 }
 
 export interface drill extends size {
