@@ -32,6 +32,8 @@ interface fp_generic {
 interface fp_arc extends fp_generic {
     type: "fp_arc";
     center: [number, number];
+    end: [number, number];
+    angle: number;
 }
 interface fp_circle extends fp_generic {
     type: "fp_circle";
