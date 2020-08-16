@@ -1,63 +1,64 @@
-interface node {
+export interface node {
     type: string;
     value: node | node[] | string;
 }
 
-type pad_shape =
+export type pad_shape =
     | "circle"
     | "rect"
     | "oval"
     | "trapezoid"
     | "roundrect"
     | "custom";
-type pad_type = "thru_hole" | "np_thru_hole" | "smd" | "connect";
 
-interface size {
+export type pad_type = "thru_hole" | "np_thru_hole" | "smd" | "connect";
+
+export interface size {
     height: string;
     width: string;
 }
 
-interface drill extends size {
+export interface drill extends size {
     oval?: boolean;
     offset?: number;
 }
 
-interface fp_generic {
+export interface fp_generic {
     layer?: string[];
     width?: number;
     tstamp?: string;
     status?: string;
 }
 
-interface fp_arc extends fp_generic {
+export interface fp_arc extends fp_generic {
     type: "fp_arc";
     center: [number, number];
     end: [number, number];
     angle: number;
 }
-interface fp_circle extends fp_generic {
+export interface fp_circle extends fp_generic {
     type: "fp_circle";
     center: [number, number];
     end: [number, number];
 }
-interface fp_curve extends fp_generic {
+export interface fp_curve extends fp_generic {
     type: "fp_curve";
     start: [number, number];
     control1: [number, number];
     control2: [number, number];
     end: [number, number];
 }
-interface fp_line extends fp_generic {
+export interface fp_line extends fp_generic {
     type: "fp_line";
     start: [number, number];
     end: [number, number];
 }
-interface fp_poly extends fp_generic {
+export interface fp_poly extends fp_generic {
     type: "fp_poly";
     points: [number, number][];
 }
 
-type fp_shape = fp_arc | fp_circle | fp_curve | fp_line | fp_poly;
+export type fp_shape = fp_arc | fp_circle | fp_curve | fp_line | fp_poly;
 
 export interface pad extends common_attribures {
     type: "pad";
@@ -70,8 +71,8 @@ export interface pad extends common_attribures {
     tstamp?: string;
 }
 
-type TEXT_TYPE = "reference" | "value" | "user";
-interface fp_text {
+export type TEXT_TYPE = "reference" | "value" | "user";
+export interface fp_text {
     text_type: TEXT_TYPE;
     value: string;
     at: at;
@@ -80,7 +81,7 @@ interface fp_text {
     effects?: text_effects;
 }
 
-interface text_effects {
+export interface text_effects {
     font?: {
         size?: number;
         thickness?: number;
@@ -91,14 +92,14 @@ interface text_effects {
     hide?: boolean;
 }
 
-type JUSTIFY = "left" | "right" | "top" | "bottom" | "mirror";
+export type JUSTIFY = "left" | "right" | "top" | "bottom" | "mirror";
 
-interface at {
+export interface at {
     x: number;
     y: number;
     angle?: number;
 }
-interface common_attribures {
+export interface common_attribures {
     // floats
     solder_mask_margin?: number;
     solder_paste_margin?: number;
@@ -113,7 +114,7 @@ interface common_attribures {
     zone_connect?: number;
 }
 
-interface kicad_module extends common_attribures {
+export interface kicad_module extends common_attribures {
     attributes?: string[];
     at?: at;
     descr?: string;

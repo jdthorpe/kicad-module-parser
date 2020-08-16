@@ -1,4 +1,14 @@
 import { parse } from "../module-parser";
+import {
+    kicad_module,
+    node,
+    pad,
+    fp_shape,
+    text_effects,
+    JUSTIFY,
+    fp_text,
+    TEXT_TYPE,
+} from "../types";
 
 export function parse_module(x: string): kicad_module {
     const module_data: kicad_module = {
