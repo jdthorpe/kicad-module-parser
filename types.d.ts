@@ -59,7 +59,7 @@ interface fp_poly extends fp_generic {
 
 type fp_shape = fp_arc | fp_circle | fp_curve | fp_line | fp_poly;
 
-interface pad extends common_attribures {
+export interface pad extends common_attribures {
     type: "pad";
     id: string;
     pad_type: pad_type;
