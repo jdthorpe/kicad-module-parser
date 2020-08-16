@@ -66,6 +66,7 @@ export interface pad extends common_attribures {
     pad_type: pad_type;
     shape: pad_shape;
     at: at;
+    size: size;
     layers?: string[];
     drill?: drill[];
     tstamp?: string;
