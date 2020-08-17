@@ -421,7 +421,7 @@ function peg$parse(input, options) {
           },
       peg$c177 = "size",
       peg$c178 = peg$literalExpectation("size", false),
-      peg$c179 = function(height, width) { 
+      peg$c179 = function(width, height) { 
               return { 
                  type: "size", 
                   value:  [ 

@@ -283,7 +283,7 @@ pad_attr
     / primitives;
 
 size 
-    = "(" _ "size" _ height:number _ width:number _ ")" { 
+    = "(" _ "size"  _ width:number _ height:number _ ")" { 
         return { 
            type: "size", 
             value:  [ 
