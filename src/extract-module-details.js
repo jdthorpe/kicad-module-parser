@@ -103,7 +103,7 @@ var process_pad = function (pad) {
         var attr = attrs_1[_i];
         switch (attr.type) {
             case "pad_id":
-                out.id = attr.value;
+                out.id = attr.value.value;
                 break;
             case "pad_type":
                 out.pad_type = attr.value;

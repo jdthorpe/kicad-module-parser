@@ -118,7 +118,7 @@ const process_pad = (pad: node): pad => {
     for (const attr of attrs) {
         switch (attr.type) {
             case "pad_id":
-                out.id = attr.value;
+                out.id = (attr.value as node).value;
                 break;
             case "pad_type":
                 out.pad_type = attr.value;
