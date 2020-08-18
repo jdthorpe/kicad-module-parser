@@ -314,11 +314,30 @@ rect_delta
 // --------------------------------------------------
 
 drill
-    = "(" _ "drill" _ height:number _ width:number _ attrs:((oval/number/offset) _ ) * ")" {
-        return { 
-            type: "drill",
-            value: [ height, width, ...attrs.map(x => x[0]) ],
+    = "(" _ "drill" _ attrs:((oval/number/offset) _ ) * ")" {
+
+        var height,width 
+        var out = []
+        for(const ATTR of attrs){
+            var attr = ATTR[0]
+            if(attr.type == "number" ){
+                height = { type: "height", value: { type:"number", value:attr.value } }
+                if(!width){
+                    width = { type: "width", value: { type:"number", value:attr.value } }
+                }
+            }else{
+                out.push(attr)
+            }
         }
+
+        if(height)
+            out.splice(0,0,height)
+
+        if(width)
+            out.splice(0,0,width)
+
+        return { type:"drill", value:out }
+
     }
 
 oval =  "oval" { return { type: "oval"}}
