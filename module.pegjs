@@ -314,24 +314,18 @@ rect_delta
 // --------------------------------------------------
 
 drill
-    = "(" _ "drill" _ attrs:((oval/number/offset) _ ) * ")" {
-        var out = {}
-        for(const ATTR of attrs){
-            var attr = ATTR[0]
-            if(attr.type == "number" ){
-                out.height = attr.value
-                if(!("width" in out)){
-                    out.width = attr.value
-                }
-            }else{
-                Object.assign(out, attr)
-            }
+    = "(" _ "drill" _ height:number _ width:number _ attrs:((oval/number/offset) _ ) * ")" {
+        return { 
+            type: "drill",
+            value: [ height, width, ...attrs.map(x => x[0]) ],
         }
-        return { type:"drill",value:out }
     }
 
 oval =  "oval" { return { type: "oval"}}
-offset = "(" _ "offset"  _ x:number _ y:number _ ")"
+offset = "(" _ "offset"  _ x:number _ y:number _ ")" {
+    return type
+
+}
 
 
 // parseBoardItemLayersAsMask
