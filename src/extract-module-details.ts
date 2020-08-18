@@ -130,9 +130,7 @@ const process_pad = (pad: node): pad => {
                 out.shape = attr.value;
                 break;
             case "drill":
-                out.drill = out.drill
-                    ? [...out.drill, attr.value]
-                    : [attr.value];
+                out.drill = combine(attr.value);
                 break;
             case "at":
                 // out.at = (attr.value as node[]).reduce((attr:node,val:any)=>{ val[attr.type] = attr.value ; return val}, {})

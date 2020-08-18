@@ -1,11 +1,4 @@
 "use strict";
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var module_parser_1 = require("../module-parser");
 function parse_module(x) {
@@ -115,8 +108,7 @@ var process_pad = function (pad) {
                 out.shape = attr.value;
                 break;
             case "drill":
-                out.drill = out.drill
-                    ? __spreadArrays(out.drill, [attr.value]) : [attr.value];
+                out.drill = combine(attr.value);
                 break;
             case "at":
                 // out.at = (attr.value as node[]).reduce((attr:node,val:any)=>{ val[attr.type] = attr.value ; return val}, {})
