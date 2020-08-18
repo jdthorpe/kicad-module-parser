@@ -108,6 +108,7 @@ var process_pad = function (pad) {
                 out.shape = attr.value;
                 break;
             case "drill":
+                console.log("drill value: ", attr.value);
                 out.drill = combine(attr.value);
                 break;
             case "at":

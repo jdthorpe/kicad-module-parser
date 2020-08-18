@@ -130,6 +130,7 @@ const process_pad = (pad: node): pad => {
                 out.shape = attr.value;
                 break;
             case "drill":
+                console.log("drill value: ", attr.value);
                 out.drill = combine(attr.value as node[]);
                 break;
             case "at":
