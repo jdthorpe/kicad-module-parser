@@ -195,10 +195,10 @@ fp_text
 // --------------------------------------------------
 
 fp_arc
-    =  "(" _ "fp_arc" _ start:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
+    =  "(" _ "fp_arc" _ center:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
         return {
             type: "fp_arc",
-            value: [ start, end,angle, ...generics ]
+            value: [ center, end,angle, ...generics ]
         };
     }
 
@@ -219,7 +219,7 @@ fp_curve
     }
 
 fp_line
-    =  "(" _ "fp_line" _  start:_start _ end:end   _  generics:fp_generics ")" {
+    =  "(" _ "fp_line" _  start:start _ end:end   _  generics:fp_generics ")" {
         return {
             type: "fp_line",
             value: [ start, end, ...generics ]
@@ -411,10 +411,10 @@ primitive_shape
     / gr_curve ;
 
 gr_arc
-    =  "(" _ "gr_arc" _ start:_start _ end:end _  generics:gr_generics  ")" {
+    =  "(" _ "gr_arc" _ center:_start _ end:end _  generics:gr_generics  ")" {
         return {
             type: "gr_arc",
-            value:[ start, end, ...generics ]
+            value:[ center, end, ...generics ]
         };
     }
 
@@ -482,9 +482,14 @@ angle
         return { type:"angle", value: angle }
     }
 
+start 
+    = "(" _ ("start") _ x:number _ y:number _ ")" { 
+        return { type:"start", value: [x, y]
+    }
+}
 _start 
     = "(" _ ("start" / "center") _ x:number _ y:number _ ")" { 
-        return { type:"start", value: [x, y]
+        return { type:"center", value: [x, y]
     }
 }
 center 
