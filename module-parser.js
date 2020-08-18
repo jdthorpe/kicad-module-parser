@@ -341,6 +341,7 @@ function peg$parse(input, options) {
       peg$c138 = "fp_arc",
       peg$c139 = peg$literalExpectation("fp_arc", false),
       peg$c140 = function(center, end, angle, generics) {
+              alert("angle + " + JSON.start(anle))
               return {
                   type: "fp_arc",
                   value: [ center, end,angle, ...generics ]
