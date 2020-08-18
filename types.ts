@@ -20,7 +20,7 @@ export interface size {
 
 export interface drill extends size {
     oval?: boolean;
-    offset?: number;
+    offset?: { x: number; y: number };
 }
 
 export interface fp_generic {
