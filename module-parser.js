@@ -439,7 +439,7 @@ function peg$parse(input, options) {
                   { type: "x", value:x }, 
                   { type: "y", value:y }, 
               ]
-              if(angle !== null) value.push( { type: "width", value:angle[0] } ) 
+              if(angle !== null) value.push( { type: "angle", value:angle[0] } ) 
               if(unlocked !== null) value.push( { type: "unlocked" } ) 
               return { type: "at", value } 
           },
