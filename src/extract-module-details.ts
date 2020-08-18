@@ -132,6 +132,9 @@ const process_pad = (pad: node): pad => {
             case "drill":
                 console.log("drill value: ", attr.value);
                 out.drill = combine(attr.value as node[]);
+                if (out.drill.offset) {
+                    out.drill.offset = combine(out.drill.offset);
+                }
                 break;
             case "at":
                 // out.at = (attr.value as node[]).reduce((attr:node,val:any)=>{ val[attr.type] = attr.value ; return val}, {})
