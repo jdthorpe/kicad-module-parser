@@ -265,8 +265,11 @@ var combine = function (x) {
             if (val instanceof Array) {
                 out[attr.type] = attr.value;
             }
-            else if (["string", "number", "number"].indexOf(val.type) !== -1) {
+            else if (val.type === "string") {
                 out[attr.type] = attr.value.value;
+            }
+            else if (val.type === "number") {
+                out[attr.type] = parseFloat(attr.value.value);
             }
             else {
                 out[attr.type] = attr.value;
