@@ -321,9 +321,9 @@ drill
         for(const ATTR of attrs){
             var attr = ATTR[0]
             if(attr.type == "number" ){
-                height = { type: "height", value: { type:"number", value:attr.value } }
+                height = { type: "height", value: attr }
                 if(!width){
-                    width = { type: "width", value: { type:"number", value:attr.value } }
+                    width = { type: "width", value: attr }
                 }
             }else{
                 out.push(attr)
@@ -342,7 +342,13 @@ drill
 
 oval =  "oval" { return { type: "oval"}}
 offset = "(" _ "offset"  _ x:number _ y:number _ ")" {
-    return type
+    return { 
+        type: "offset",
+        value: [
+            { type: "x", value: x },
+            { type: "y", value: y }
+        ]
+    }
 
 }
 

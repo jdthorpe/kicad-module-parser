@@ -457,9 +457,9 @@ function peg$parse(input, options) {
               for(const ATTR of attrs){
                   var attr = ATTR[0]
                   if(attr.type == "number" ){
-                      height = { type: "height", value: { type:"number", value:attr.value } }
+                      height = { type: "height", value: attr }
                       if(!width){
-                          width = { type: "width", value: { type:"number", value:attr.value } }
+                          width = { type: "width", value: attr }
                       }
                   }else{
                       out.push(attr)
@@ -479,7 +479,13 @@ function peg$parse(input, options) {
       peg$c192 = "offset",
       peg$c193 = peg$literalExpectation("offset", false),
       peg$c194 = function(x, y) {
-          return type
+          return { 
+              type: "offset",
+              value: [
+                  { type: "x", value: x },
+                  { type: "y", value: y }
+              ]
+          }
 
       },
       peg$c195 = "layers",
