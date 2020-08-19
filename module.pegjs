@@ -196,10 +196,12 @@ fp_text
 
 fp_arc
     =  "(" _ "fp_arc" _ center:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
-        alert("angle + " + JSON.stringify(angle))
+        const out = [ center, end]
+        if(angle !== null)
+            out.push( angle[0])
         return {
             type: "fp_arc",
-            value: [ center, end,angle, ...generics ]
+            value: [ ...out , ...generics ]
         };
     }
 

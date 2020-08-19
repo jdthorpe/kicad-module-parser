@@ -341,10 +341,12 @@ function peg$parse(input, options) {
       peg$c138 = "fp_arc",
       peg$c139 = peg$literalExpectation("fp_arc", false),
       peg$c140 = function(center, end, angle, generics) {
-              alert("angle + " + JSON.stringify(angle))
+              const out = [ center, end]
+              if(angle !== null)
+                  out.push( angle[0])
               return {
                   type: "fp_arc",
-                  value: [ center, end,angle, ...generics ]
+                  value: [ ...out , ...generics ]
               };
           },
       peg$c141 = "fp_circle",
