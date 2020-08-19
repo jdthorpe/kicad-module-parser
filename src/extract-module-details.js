@@ -157,7 +157,7 @@ var process_fp_shape = function (shape) {
                 break;
             case "angle":
                 alert("before: " + JSON.stringify(attr.value));
-                out[attr.type] = reduce_numbers(attr.value);
+                out[attr.type] = parseFloat(attr.value.value);
                 alert("after: " + out[attr.type]);
                 break;
             case "pts":

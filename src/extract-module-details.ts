@@ -186,7 +186,9 @@ const process_fp_shape = (shape: node): fp_shape => {
                 break;
             case "angle":
                 alert("before: " + JSON.stringify(attr.value));
-                out[attr.type] = reduce_numbers(attr.value as node[]);
+                out[attr.type] = parseFloat(
+                    (attr.value as node).value! as string
+                );
                 alert("after: " + out[attr.type]);
                 break;
             case "pts":
