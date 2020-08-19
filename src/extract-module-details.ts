@@ -131,7 +131,6 @@ const process_pad = (pad: node): pad => {
                 break;
             case "drill":
                 out.drill = combine(attr.value as node[]);
-                console.log("drill value: ", out.drill);
                 if (out.drill.offset) {
                     out.drill.offset = combine(out.drill.offset);
                 }
@@ -185,11 +184,11 @@ const process_fp_shape = (shape: node): fp_shape => {
                 out[attr.type] = reduce_numbers(attr.value as node[]);
                 break;
             case "angle":
-                alert("before: " + JSON.stringify(attr.value));
+                // alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = parseFloat(
                     (attr.value as node).value! as string
                 );
-                alert("after: " + out[attr.type]);
+                // alert("after: " + out[attr.type]);
                 break;
             case "pts":
                 out["points"] = (attr.value as node[]).map((x) => {

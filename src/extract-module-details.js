@@ -109,7 +109,6 @@ var process_pad = function (pad) {
                 break;
             case "drill":
                 out.drill = combine(attr.value);
-                console.log("drill value: ", out.drill);
                 if (out.drill.offset) {
                     out.drill.offset = combine(out.drill.offset);
                 }
@@ -156,9 +155,9 @@ var process_fp_shape = function (shape) {
                 out[attr.type] = reduce_numbers(attr.value);
                 break;
             case "angle":
-                alert("before: " + JSON.stringify(attr.value));
+                // alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = parseFloat(attr.value.value);
-                alert("after: " + out[attr.type]);
+                // alert("after: " + out[attr.type]);
                 break;
             case "pts":
                 out["points"] = attr.value.map(function (x) {
