@@ -343,7 +343,6 @@ function peg$parse(input, options) {
       peg$c140 = function(center, end, angle, generics) {
               const out = [ center, end]
               if(angle !== null){
-                  alert("angle: "+JSON.stringify(angle[0]))
                   out.push( angle[0])
               }
               return {
