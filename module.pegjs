@@ -483,7 +483,7 @@ width
     }
 
 angle 
-    = "(" _ "angle"  _ angle:number _ ")" {
+    = "(" _ "angle" _ angle:number _ ")" {
         return { type:"angle", value: angle }
     }
 
