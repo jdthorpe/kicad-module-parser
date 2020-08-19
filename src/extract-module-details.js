@@ -237,7 +237,7 @@ var process_fp_text = function (text) {
                 out.effects = process_fp_text_effects(attr);
                 break;
             default:
-                console.log("unhandled fp attribute: ", attr);
+                console.log("unhandled text attribute: ", attr);
         }
     }
     return out;
