@@ -214,7 +214,8 @@ const process_fp_shape = (shape: node): fp_shape => {
                 out.status = (attr.value as node).value;
                 break;
             default:
-                console.log("unhandled fp attribute: ", attr.type);
+                alert("unhandled shape attribute: " + JSON.stringify(attr));
+                console.log("unhandled shape attribute: ", attr.type);
         }
     }
     return out as fp_shape;

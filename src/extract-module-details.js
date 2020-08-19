@@ -183,7 +183,8 @@ var process_fp_shape = function (shape) {
                 out.status = attr.value.value;
                 break;
             default:
-                console.log("unhandled fp attribute: ", attr.type);
+                alert("unhandled shape attribute: " + JSON.stringify(attr));
+                console.log("unhandled shape attribute: ", attr.type);
         }
     }
     return out;
