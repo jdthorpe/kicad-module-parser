@@ -153,6 +153,8 @@ var process_fp_shape = function (shape) {
             case "center":
             case "start":
             case "end":
+                out[attr.type] = reduce_numbers(attr.value);
+                break;
             case "angle":
                 alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = reduce_numbers(attr.value);

@@ -182,6 +182,8 @@ const process_fp_shape = (shape: node): fp_shape => {
             case "center":
             case "start":
             case "end":
+                out[attr.type] = reduce_numbers(attr.value as node[]);
+                break;
             case "angle":
                 alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = reduce_numbers(attr.value as node[]);
