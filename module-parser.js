@@ -1428,9 +1428,6 @@ function peg$parse(input, options) {
                                       s1 = peg$FAILED;
                                       if (peg$silentFails === 0) { peg$fail(peg$c52); }
                                     }
-                                    if (s1 === peg$FAILED) {
-                                      s1 = peg$parseCU_LAYER();
-                                    }
                                   }
                                 }
                               }

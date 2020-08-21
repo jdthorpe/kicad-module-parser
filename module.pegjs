@@ -66,7 +66,7 @@ _LAYER
      /"Eco1.User"
      /"Eco2.User"
      /"Edge.Cuts"
-     / CU_LAYER) {
+     ) {
         return { type: "string", value} 
     }
 
