@@ -1289,7 +1289,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseLAYER() {
+  function peg$parse_LAYER() {
     var s0, s1;
 
     s0 = peg$currPos;
@@ -1452,6 +1452,17 @@ function peg$parse(input, options) {
       s1 = peg$c53(s1);
     }
     s0 = s1;
+
+    return s0;
+  }
+
+  function peg$parseLAYER() {
+    var s0;
+
+    s0 = peg$parse_LAYER();
+    if (s0 === peg$FAILED) {
+      s0 = peg$parseCU_LAYER();
+    }
 
     return s0;
   }

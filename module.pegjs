@@ -48,7 +48,7 @@ layer = "(" _ "layer" _ layers:(LAYER _)* ")" {
     }
 }
 
-LAYER  
+_LAYER  
     = value:("B.Adhes"
      /"F.Adhes"
      /"B.Paste"
@@ -69,6 +69,11 @@ LAYER
      / CU_LAYER) {
         return { type: "string", value} 
     }
+
+LAYER = 
+    _LAYER / CU_LAYER
+
+
 
 // ----------------------------------------
 // ----------------------------------------
