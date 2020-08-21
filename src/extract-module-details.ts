@@ -141,7 +141,9 @@ const process_pad = (pad: node): pad => {
                 break;
             case "layer":
             case "layers":
+                alert("before: " + JSON.stringify(attr.value));
                 out.layers = reduce_strings(attr.value as node[]);
+                alert("after: " + JSON.stringify(out.layers));
                 break;
 
             // floats
@@ -203,7 +205,8 @@ const process_fp_shape = (shape: node): fp_shape => {
             case "curve_points":
                 Object.assign(combine(attr.value as node[]), out);
                 break;
-            /// generics
+
+            // generics
             case "layer":
                 out.layers = reduce_strings(attr.value as node[]);
                 break;
