@@ -119,9 +119,7 @@ var process_pad = function (pad) {
                 break;
             case "layer":
             case "layers":
-                alert("before: " + JSON.stringify(attr.value));
                 out.layers = reduce_strings(attr.value);
-                alert("after: " + JSON.stringify(out.layers));
                 break;
             // floats
             case "solder_mask_margin":
@@ -157,9 +155,7 @@ var process_fp_shape = function (shape) {
                 out[attr.type] = reduce_numbers(attr.value);
                 break;
             case "angle":
-                // alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = parseFloat(attr.value.value);
-                // alert("after: " + out[attr.type]);
                 break;
             case "pts":
                 out["points"] = attr.value.map(function (x) {
@@ -186,8 +182,7 @@ var process_fp_shape = function (shape) {
                 out.status = attr.value.value;
                 break;
             default:
-                alert("unhandled shape attribute: " + JSON.stringify(attr));
-                console.log("unhandled shape attribute: ", attr.type);
+                console.log("unhandled shape attribute: ", attr);
         }
     }
     return out;

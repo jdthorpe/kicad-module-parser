@@ -141,9 +141,7 @@ const process_pad = (pad: node): pad => {
                 break;
             case "layer":
             case "layers":
-                alert("before: " + JSON.stringify(attr.value));
                 out.layers = reduce_strings(attr.value as node[]);
-                alert("after: " + JSON.stringify(out.layers));
                 break;
 
             // floats
@@ -186,11 +184,9 @@ const process_fp_shape = (shape: node): fp_shape => {
                 out[attr.type] = reduce_numbers(attr.value as node[]);
                 break;
             case "angle":
-                // alert("before: " + JSON.stringify(attr.value));
                 out[attr.type] = parseFloat(
                     (attr.value as node).value! as string
                 );
-                // alert("after: " + out[attr.type]);
                 break;
             case "pts":
                 out["points"] = (attr.value as node[]).map((x) => {
@@ -220,8 +216,7 @@ const process_fp_shape = (shape: node): fp_shape => {
                 out.status = (attr.value as node).value;
                 break;
             default:
-                alert("unhandled shape attribute: " + JSON.stringify(attr));
-                console.log("unhandled shape attribute: ", attr.type);
+                console.log("unhandled shape attribute: ", attr);
         }
     }
     return out as fp_shape;
