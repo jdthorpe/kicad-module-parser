@@ -80,7 +80,7 @@ function parse_module(x) {
                 module_data[part.type] = parseInt(part.value.value);
                 break;
             default:
-                console.log("unhandled part: " + part.type);
+                console.log("unhandled part: " + JSON.stringify(part));
         }
     }
     return module_data;
@@ -119,7 +119,9 @@ var process_pad = function (pad) {
                 break;
             case "layer":
             case "layers":
+                alert("before: " + JSON.stringify(attr.value));
                 out.layers = reduce_strings(attr.value);
+                alert("after: " + JSON.stringify(out.layers));
                 break;
             // floats
             case "solder_mask_margin":
@@ -170,7 +172,7 @@ var process_fp_shape = function (shape) {
             case "curve_points":
                 Object.assign(combine(attr.value), out);
                 break;
-            /// generics
+            // generics
             case "layer":
                 out.layers = reduce_strings(attr.value);
                 break;
