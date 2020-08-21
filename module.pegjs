@@ -625,11 +625,14 @@ cu_layer
     = "(" _ "layer" _  layer: CU_LAYER _ ")" { return { type:"layer", value:layer } }
 
 CU_LAYER  
-    = "F.Cu"
-    / "B.Cu";
+    = value:("F.Cu"
+    / "B.Cu") {
+        return { type: "string", value} 
+    }
+
 
 LAYER_MASKS
-    = "*.Cu"
+    = value:("*.Cu"
     / "*In.Cu"
     / "F&B.Cu"
     / "*.Adhes"
@@ -639,9 +642,9 @@ LAYER_MASKS
     / "*.Fab"
     / "*.CrtYd"
     / "Inner"[1-9]".Cu"
-    / "Inner1"[01-4]".Cu"
-
-LAYERS
-    = value:(LAYER / CU_LAYER / LAYER_MASKS) {
+    / "Inner1"[01-4]".Cu") {
         return { type: "string", value} 
     }
+
+LAYERS
+    = LAYER / CU_LAYER / LAYER_MASKS;
