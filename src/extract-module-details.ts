@@ -101,7 +101,7 @@ export function parse_module(x: string): kicad_module {
                 break;
 
             default:
-                console.log("unhandled part: " + part.type);
+                console.log("unhandled part: " + JSON.stringify(part));
         }
     }
     return module_data;
