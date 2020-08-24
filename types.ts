@@ -24,7 +24,7 @@ export interface drill extends size {
 }
 
 export interface fp_generic {
-    layer?: string[];
+    layers?: string[];
     width?: number;
     tstamp?: string;
     status?: string;
