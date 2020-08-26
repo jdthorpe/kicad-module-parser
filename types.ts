@@ -77,7 +77,7 @@ export interface fp_text {
     text_type: TEXT_TYPE;
     value: string;
     at: at;
-    layer?: string[];
+    layers?: string[];
     hide?: boolean;
     effects?: text_effects;
 }
