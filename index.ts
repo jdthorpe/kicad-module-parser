@@ -1,7 +1,6 @@
 // <reference path="types.d.ts"/>
 export * from "./types";
-export { parse_module } from "./src/extract-module-details";
-import { parse as _parse } from "./src/module-parser";
+import { parse as _parse } from "./src/parse";
 
 export const parse = {
     module: (x: string, options: any) =>

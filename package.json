@@ -7,7 +7,7 @@
     "scripts": {
         "build": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
         "watch": "npx nodemon",
-        "test": "node test.js"
+        "test": "node test/"
     },
     "devDependencies": {
         "@types/fs-extra": "^9.0.1",
@@ -26,5 +26,8 @@
         "@types/argparse": "^2.0.10",
         "@types/js-yaml": "^4.0.2",
         "argparse": "^2.0.1"
+    },
+    "bin": {
+        "k2j": "./bin/k2j"
     }
 }

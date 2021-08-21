@@ -12,25 +12,39 @@ const js_yaml_1 = __importDefault(require("js-yaml"));
 const chalk_1 = __importDefault(require("chalk"));
 const ajv_1 = __importDefault(require("ajv"));
 const utils_1 = require("../src/utils");
+// ---------------
+// constants
+// ---------------
 const AJV = new ajv_1.default({ strict: false });
 const schema = js_yaml_1.default.load(fs_extra_1.default.readFileSync(path_1.default.join(__dirname, "sexp_schema.yaml"), "utf-8"));
-// console.log("schema", JSON.stringify(schema, null, 2));
-// process.exit();
-// const mod = fse.readFileSync( "/Users/jasonthorpe/kb/kicad-module-parser/data/kicad-footprints/Connector_Samtec_HLE_SMD.pretty/Samtec_HLE-133-02-xxx-DV-LC_2x33_P2.54mm_Horizontal.kicad_mod" );
-// https://github.com/Digi-Key/digikey-kicad-library.git
-// https://github.com/KiCad/kicad-footprints.git
+// ---------------
+// export
+// ---------------
 let resolver;
 const Done = new Promise((resolve) => (resolver = resolve));
 exports.default = Done;
+// --------------------------------------------------
+// process a single file
+// --------------------------------------------------
+if (process.argv[2]) {
+    process_file(process.argv[2]);
+    process.exit();
+}
+// --------------------------------------------------
+// process all the files in the data directory
+// --------------------------------------------------
 klaw_1.default(path_1.default.join(__dirname, "..", "data"))
     .pipe(through2_1.default.obj(function (item, enc, next) {
     if (!item.stats.isDirectory() && item.path.endsWith(".kicad_mod"))
         this.push(item);
     next();
 }))
-    .on("data", (item) => process_item(item.path))
+    .on("data", (item) => process_file(item.path))
     .on("end", () => resolver());
-function process_item(filepath) {
+// --------------------------------------------------
+// process all the files in the data directory
+// --------------------------------------------------
+function process_file(filepath) {
     const mod = fs_extra_1.default.readFileSync(filepath).toString();
     let data;
     try {
@@ -78,5 +92,5 @@ function process_item(filepath) {
         console.log(data);
         process.exit();
     }
-    fs_extra_1.default.writeFileSync(filepath.slice(0, -10) + "_.json", JSON.stringify(sdata, null, 2));
+    fs_extra_1.default.writeFileSync(filepath.slice(0, -10) + "_.json", JSON.stringify(Object.fromEntries([[sdata.type, sdata.value]]), null, 2));
 }

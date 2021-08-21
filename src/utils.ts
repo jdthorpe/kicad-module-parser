@@ -1,7 +1,6 @@
 //--------------------------------------------------
 // utility functions
 //--------------------------------------------------
-import args from "../cli/args";
 import {
     n_array,
     n_named_value,
@@ -11,13 +10,6 @@ import {
 } from "../types";
 
 const verbose = false;
-/*
-combine([
-    { type:'a', value:1 },
-    { type:'b', value:2 },
-    { type:'c', value:3 },
-]) -> {'a':1, 'b':2, 'c':3}
-*/
 
 function simplify_primitive(x: n_primitive | n_array | n_named_value): any {
     verbose && console.log("simplify_primitive: ", x);
@@ -55,7 +47,7 @@ type stackitem = [
     any[]
 ];
 
-const itype = "pcb_text_width";
+// const itype = "pcb_text_width";
 export const post_process = (x: n_container): any => {
     // depth first transformation
 
@@ -87,10 +79,11 @@ export const post_process = (x: n_container): any => {
                 return out;
             }
             [current, i, values] = SI;
+            /* inspect: 
             if (current.type === itype) {
                 console.log(`return to ${current.type} ${i} with value:`, out);
                 console.log("from", current.value[i], "\n======");
-            }
+            } */
             values.push(out);
             i++;
             continue;
@@ -99,13 +92,14 @@ export const post_process = (x: n_container): any => {
         next = current.value[i];
         verbose && console.log("curent", current);
         verbose && console.log("next", next);
-        if (current.type === itype) {
+        /* inspect: 
+        if (current.type === itype) 
             console.log(`${current.type} i: `, i, next, "\n======");
-        }
+            */
         if (Array.isArray(next.value)) {
-            if (current.type === itype) {
-                console.log("recurse\n>>>");
-            }
+            /* inspect: 
+            if (current.type === itype) console.log("recurse\n>>>");
+            */
             // recurse
             SI = [current, i, values];
             stack.push(SI);
@@ -114,10 +108,7 @@ export const post_process = (x: n_container): any => {
             i = 0;
             values = [];
         } else {
-            if (current.type === itype) {
-                console.log(`${current.type} push: `, i, next, "\n>>>");
-            }
-            // if(current.type === "thickness") process.exit(1)
+            // inspect: if (current.type === itype) console.log(`${current.type} push: `, i, next, "\n>>>");
             values.push(
                 simplify_primitive(
                     next as n_primitive | n_named_value | n_array
@@ -125,16 +116,7 @@ export const post_process = (x: n_container): any => {
             );
             i++;
         }
-
-        // The current element of the array is a simple element
-        // the current element is a simpleton
-        // e.g. {'pad_type': {string:"np_throu_hole"}}
     }
-    throw "never";
-};
-
-const assert = (x: boolean, message: string) => {
-    if (!x) throw message;
 };
 
 const has_dups: string[] = [];
@@ -191,7 +173,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
             };
         case "area":
         case "layers":
-            // setup options:
+        // setup options:
         case "user_via":
         case "user_diff_pair":
         case "pcb_text_size":
@@ -199,7 +181,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
         case "pad_size":
         case "aux_axis_origin":
         case "grid_origin":
-            // pad 
+        // pad
         case "primitives":
         case "justify":
             if (values.every((x) => typeof x === "object" && "type" in x))
@@ -207,25 +189,6 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
             return { type, value: values };
         case "pts":
             return { type, value: values.map((x) => x.value) };
-        // case "center": // TODO: formerly an array of length 2
-        // case "start": // TODO: formerly an array of length 2
-        // case "end": // TODO: formerly an array of length 2
-        // case "mid": // TODO: formerly an array of length 2
-        // case "xy": // TODO: formerly an array of length 2
-        //     assert(
-        //         values.length === 2,
-        //         `${type} should have 2 values but got ${JSON.stringify(
-        //             values,
-        //             null,
-        //             2
-        //         )} at ${stack.map((x) => `${x[0].type}[${x[1]}]`).join("/")}`
-        //     );
-        //     // console.log("xy", { x: values[0], y: values[1] })
-        //     return { x: values[0], y: values[1] };
-        // case "xyz":
-        //     assert(values.length === 3, `${type} should have 3 values`);
-        //     return { x: values[0], y: values[1], z: values[2] };
-GATHER: 
         default:
             if (!values.every((x) => typeof x.type !== "undefined")) {
                 console.log(values);
@@ -257,8 +220,7 @@ GATHER:
                 );
             }
 
-            if (!values.map((x) => typeof x.type !== "undefined"))
-                console.log();
+            /* inspect: 
             if (type === itype) {
                 console.log("values: ", values);
                 console.log(values.map((x) => typeof x.type !== "undefined"));
@@ -270,52 +232,13 @@ GATHER:
                 );
                 console.log("bye");
                 process.exit();
-            }
+            }*/
             return {
                 type: type,
                 value: Object.fromEntries(values.map((x) => [x.type, x.value])),
             };
     }
 }
-
-// export const combine = (x: (n_primitive | n_container | n_array)[]): any => {
-//     const out: any = {};
-//
-//     for (let attr of x) {
-//         let val = attr.value;
-//         if (val instanceof Array) {
-//             out[attr.type] = attr.value;
-//         } else if (val.type === "string") {
-//             out[attr.type] = (attr.value as node).value!;
-//         } else if (val.type === "number") {
-//             out[attr.type] = parseFloat((attr.value as node).value! as string);
-//         } else {
-//             out[attr.type] = attr.value;
-//         }
-//     }
-//
-//     return out;
-// };
-
-/*
-reduce_strings([
-    { type:'string', value:'A' },
-    { type:'string', value:'B' },
-    { type:'string', value:'C' },
-]) -> ["A","B","C"]
-*/
-
-export const reduce_strings = (x: node[]) => x.map((y) => y.value as string);
-
-/*
-reduce_numbers([
-    { type:'string', value:'1.1' },
-    { type:'string', value:'2.2' },
-    { type:'string', value:'3.3' },
-]) -> ["1.1","2.2","3.3"]
-*/
-export const reduce_numbers = (x: node[]) =>
-    x.map((y) => parseFloat(y.value as string));
 
 function gather(values: { type: string; value: any }[], key: string) {
     /*

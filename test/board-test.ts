@@ -8,25 +8,34 @@ import chalk from "chalk";
 import Ajv from "ajv";
 import { post_process } from "../src/utils";
 
+// ---------------
+// constants
+// ---------------
+
 const AJV = new Ajv({ strict: false });
 
 const schema: any = yaml.load(
     fse.readFileSync(path.join(__dirname, "sexp_schema.yaml"), "utf-8")
 );
 
-// const mod = fse.readFileSync( "/Users/jasonthorpe/kb/kicad-module-parser/data/kicad-footprints/Connector_Samtec_HLE_SMD.pretty/Samtec_HLE-133-02-xxx-DV-LC_2x33_P2.54mm_Horizontal.kicad_mod" );
-// https://github.com/Digi-Key/digikey-kicad-library.git
-// https://github.com/KiCad/kicad-footprints.git
-
+// ---------------
+// export
+// ---------------
 let resolver: { (value?: Promise<any>): void };
 const Done = new Promise((resolve) => (resolver = resolve));
 export default Done;
 
+// --------------------------------------------------
+// process a single file
+// --------------------------------------------------
 if (process.argv[2]) {
     process_file(process.argv[2]);
     process.exit();
 }
 
+// --------------------------------------------------
+// process all the files in the data directory
+// --------------------------------------------------
 walk(path.join(__dirname, "..", "data"))
     .pipe(
         through2.obj(function (item, enc, next) {
@@ -38,6 +47,9 @@ walk(path.join(__dirname, "..", "data"))
     .on("data", (item) => process_file(item.path))
     .on("end", () => resolver());
 
+// --------------------------------------------------
+// Worker
+// --------------------------------------------------
 function process_file(filepath: string) {
     const mod: string = fse.readFileSync(filepath).toString();
     let data: any;
@@ -107,8 +119,9 @@ function process_file(filepath: string) {
         console.log(data);
         process.exit();
     }
+
     fse.writeFileSync(
         filepath.slice(0, -10) + "_.json",
-        JSON.stringify(sdata, null, 2)
+        JSON.stringify(Object.fromEntries([[sdata.type, sdata.value]]), null, 2)
     );
 }

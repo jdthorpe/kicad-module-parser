@@ -757,9 +757,9 @@ function peg$parse(input, options) {
               return { 
                   type, 
                   value: [ 
-                      {type:"value",value},
+                      {type:"text",value},
                       { 
-                          type: "text_type",
+                          type: "type",
                           value: {
                               type:"string",
                               value:text_type
