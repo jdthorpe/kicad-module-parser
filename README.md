@@ -39,8 +39,8 @@ User friendly data
 
 ```ts
 import { parse } from "kicad-module-parser"
-parse.module(some_kicad_module)
-parse.board(some_kicad_board)
+parse.module(kicad_mod_contents)
+parse.board(kicad_pcb_contents)
 ```
 
 ## About the output
