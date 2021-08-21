@@ -1,6 +1,22 @@
-export interface node {
+export type node = n_container | n_primitive | n_array | n_named_value;
+export interface n_container {
     type: string;
-    value: node | node[] | string;
+    value: node[];
+}
+
+export interface n_named_value {
+    type: string;
+    value: n_primitive | n_array;
+}
+
+export interface n_primitive {
+    type: "string" | "boolean" | "number";
+    value: string | boolean;
+}
+
+export interface n_array {
+    type: "array";
+    value: n_primitive[];
 }
 
 export type pad_shape =

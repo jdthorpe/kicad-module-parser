@@ -1,0 +1,75 @@
+$ref: "#/s_object"
+
+s_object: # Container
+    type: object
+    properties:
+        type:
+            not:
+                anyOf:
+                    - const: "string"
+                    - const: "number"
+                    - const: "boolean"
+                    - const: "array"
+        value:
+            anyOf:
+                - type: array
+                  items:
+                      anyOf:
+                          - $ref: "#/s_object"
+                          - $ref: "#/s_boolean"
+                          - $ref: "#/s_string"
+                          - $ref: "#/s_array"
+                - $ref: "#/s_boolean"
+                - $ref: "#/s_string"
+                - $ref: "#/s_array"
+            additional_items: false
+    required:
+        - type
+        - value
+    additional_properties: false
+
+s_array: # Primitive-like
+    # strangely, "array" is "primitive like" b/c it is not recursive
+    # (i.e. only contains primitives)
+    type: object
+    properties:
+        type:
+            const: "array"
+        value:
+            type: array
+            items:
+                anyOf:
+                    - $ref: "#/s_boolean"
+                    - $ref: "#/s_string"
+            additional_items: false
+    required:
+        - type
+        - value
+    additional_properties: false
+
+s_string: # Primitive
+    type: object
+    properties:
+        type:
+            enum:
+                - "string"
+                - "number"
+                - "hex"
+        value:
+            type: string
+    required:
+        - type
+        - value
+    additional_properties: false
+
+s_boolean: # Primitive
+    type: object
+    properties:
+        type:
+            const: "boolean"
+        value:
+            type: boolean
+    required:
+        - type
+        - value
+    additional_properties: false

@@ -1,15 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var module_parser_1 = require("../module-parser");
+exports.simplify_module = exports.parse_module = void 0;
+const module_parser_1 = require("./module-parser");
+const utils_1 = require("./utils");
 function parse_module(x) {
-    var module_data = {
+    const NODE = module_parser_1.parse(x, { startRule: "module" });
+    return simplify_module(NODE);
+}
+exports.parse_module = parse_module;
+function simplify_module(NODE) {
+    const module_data = {
         pads: [],
         text: [],
         shapes: [],
     };
-    var NODE = module_parser_1.parse(x);
-    for (var _i = 0, _a = NODE.value; _i < _a.length; _i++) {
-        var part = _a[_i];
+    const value = NODE.value;
+    if (!(value instanceof Array))
+        throw "unexpected module value type";
+    for (const part of value) {
         switch (part.type) {
             case "module_attribute":
                 if (part.value.value === "smd") {
@@ -20,22 +28,21 @@ function parse_module(x) {
                     module_data.virtual = true;
                     break;
                 }
-                console.log("Unandled module attribute value: " + part.value);
+                console.log(`Unandled module attribute value: ${part.value}`);
                 break;
             case "layer":
-                module_data.layer = reduce_strings(part.value);
+                module_data.layer = utils_1.reduce_strings(part.value);
                 break;
             case "tags":
                 if (part.value.type == "array") {
-                    module_data.tags = reduce_strings(part.value.value);
+                    module_data.tags = utils_1.reduce_strings(part.value.value);
                     break;
                 }
                 if (part.value.type == "string") {
-                    module_data.tags = part.value
-                        .value.split(" ");
+                    module_data.tags = part.value.value.split(" ");
                     break;
                 }
-                console.log("Unandled tags value: " + part.value.type);
+                console.log(`Unandled tags value: ${part.value.type}`);
                 console.log(part.value);
                 break;
             case "fp_arc":
@@ -49,7 +56,7 @@ function parse_module(x) {
                 module_data.text.push(process_fp_text(part));
                 break;
             case "at":
-                module_data.at = combine(part.value);
+                module_data.at = utils_1.combine(part.value);
                 break;
             case "pad":
                 module_data.pads.push(process_pad(part));
@@ -85,15 +92,14 @@ function parse_module(x) {
     }
     return module_data;
 }
-exports.parse_module = parse_module;
+exports.simplify_module = simplify_module;
 // --------------------------------------------------
 // helpers
 // --------------------------------------------------
-var process_pad = function (pad) {
-    var out = { type: "pad" };
-    var attrs = pad.value;
-    for (var _i = 0, attrs_1 = attrs; _i < attrs_1.length; _i++) {
-        var attr = attrs_1[_i];
+const process_pad = (pad) => {
+    const out = { type: "pad" };
+    const attrs = pad.value;
+    for (const attr of attrs) {
         switch (attr.type) {
             case "pad_id":
                 out.id = attr.value.value;
@@ -102,26 +108,30 @@ var process_pad = function (pad) {
                 out.pad_type = attr.value;
                 break;
             case "size":
-                out.size = combine(attr.value);
+                out.size = utils_1.combine(attr.value);
                 break;
             case "pad_shape":
                 out.shape = attr.value;
                 break;
             case "drill":
-                out.drill = combine(attr.value);
+                out.drill = utils_1.combine(attr.value);
                 if (out.drill.offset) {
-                    out.drill.offset = combine(out.drill.offset);
+                    out.drill.offset = utils_1.combine(out.drill.offset);
                 }
                 break;
+            case "rect_delta":
             case "at":
                 // out.at = (attr.value as node[]).reduce((attr:node,val:any)=>{ val[attr.type] = attr.value ; return val}, {})
-                out.at = combine(attr.value);
+                out[attr.type] = utils_1.combine(attr.value);
                 break;
             case "layer":
             case "layers":
-                out.layers = reduce_strings(attr.value);
+                out.layers = utils_1.reduce_strings(attr.value);
                 break;
             // floats
+            case "chamfer_ratio":
+            case "roundrect_rratio":
+            case "die_length":
             case "solder_mask_margin":
             case "solder_paste_margin":
             case "solder_paste_ratio":
@@ -136,50 +146,50 @@ var process_pad = function (pad) {
             case "zone_connect":
                 out[attr.type] = parseInt(attr.value.value);
                 break;
+            case "tstamp":
+            case "locked":
+                out[attr.type] = attr.value;
+                break;
             default:
                 console.log("unhandled pad attribute: ", attr.type);
+                process.exit();
         }
     }
     return out;
 };
 // (fp_line (start 6.35 -6.35) (end 6.35 6.35) (layer Cmts.User) (width 0.1524))
-var process_fp_shape = function (shape) {
-    var out = { type: shape.type };
-    var attrs = shape.value;
-    for (var _i = 0, attrs_2 = attrs; _i < attrs_2.length; _i++) {
-        var attr = attrs_2[_i];
+const process_fp_shape = (shape) => {
+    const out = { type: shape.type };
+    const attrs = shape.value;
+    for (const attr of attrs) {
         switch (attr.type) {
             case "center":
             case "start":
             case "end":
-                out[attr.type] = reduce_numbers(attr.value);
+                out[attr.type] = utils_1.reduce_numbers(attr.value);
                 break;
             case "angle":
                 out[attr.type] = parseFloat(attr.value.value);
                 break;
             case "pts":
-                out["points"] = attr.value.map(function (x) {
+                out["points"] = attr.value.map((x) => {
                     if (x.type !== "xy") {
                         throw new Error("invalid polygon point type: " + x.type);
                     }
-                    return reduce_numbers(x.value);
+                    return utils_1.reduce_numbers(x.value);
                 });
                 break;
             case "curve_points":
-                Object.assign(combine(attr.value), out);
+                Object.assign(utils_1.combine(attr.value), out);
                 break;
             // generics
             case "layer":
-                out.layers = reduce_strings(attr.value);
+                out.layers = utils_1.reduce_strings(attr.value);
                 break;
             case "width":
-                out.width = attr.value.value;
-                break;
             case "tstamp":
-                out.tstamp = attr.value.value;
-                break;
             case "status":
-                out.status = attr.value.value;
+                out[attr.type] = attr.value.value;
                 break;
             default:
                 console.log("unhandled shape attribute: ", attr);
@@ -188,20 +198,19 @@ var process_fp_shape = function (shape) {
     return out;
 };
 // (fp_line (start 6.35 -6.35) (end 6.35 6.35) (layer Cmts.User) (width 0.1524))
-var process_fp_text_effects = function (text) {
-    var out = {};
-    var attrs = text.value;
-    for (var _i = 0, attrs_3 = attrs; _i < attrs_3.length; _i++) {
-        var attr = attrs_3[_i];
+const process_fp_text_effects = (text) => {
+    const out = {};
+    const attrs = text.value;
+    for (const attr of attrs) {
         switch (attr.type) {
             case "font":
-                var font = combine(attr.value);
+                let font = utils_1.combine(attr.value);
                 if ("size" in font)
-                    font.size = combine(font.size);
+                    font.size = utils_1.combine(font.size);
                 out.font = font;
                 break;
             case "justify":
-                out.justify = reduce_strings(attr.value);
+                out.justify = utils_1.reduce_strings(attr.value);
                 break;
             case "hide":
                 out.hide = true;
@@ -210,11 +219,10 @@ var process_fp_text_effects = function (text) {
     }
     return out;
 };
-var process_fp_text = function (text) {
-    var out = { type: text.type };
-    var attrs = text.value;
-    for (var _i = 0, attrs_4 = attrs; _i < attrs_4.length; _i++) {
-        var attr = attrs_4[_i];
+const process_fp_text = (text) => {
+    const out = { type: text.type };
+    const attrs = text.value;
+    for (const attr of attrs) {
         switch (attr.type) {
             case "text_type":
                 out.text_type = attr.value.value;
@@ -223,13 +231,13 @@ var process_fp_text = function (text) {
                 out.value = attr.value.value;
                 break;
             case "at":
-                out.at = combine(attr.value);
+                out.at = utils_1.combine(attr.value);
                 break;
             case "hide":
                 out.hide = true;
                 break;
             case "layer":
-                out.layers = reduce_strings(attr.value);
+                out.layers = utils_1.reduce_strings(attr.value);
                 break;
             case "effects":
                 out.effects = process_fp_text_effects(attr);
@@ -239,61 +247,4 @@ var process_fp_text = function (text) {
         }
     }
     return out;
-};
-//--------------------------------------------------
-// utility functions
-//--------------------------------------------------
-/*
-combine([
-    { type:'a', value:1 },
-    { type:'b', value:2 },
-    { type:'c', value:3 },
-]) -> {'a':1, 'b':2, 'c':3}
-*/
-var combine = function (x) {
-    var out = {};
-    for (var _i = 0, x_1 = x; _i < x_1.length; _i++) {
-        var attr = x_1[_i];
-        var val = attr.value;
-        if (!attr.value) {
-            out[attr.type] = true;
-            continue;
-        }
-        if (typeof val === "string") {
-            out[attr.type] = attr.value;
-        }
-        else {
-            if (val instanceof Array) {
-                out[attr.type] = attr.value;
-            }
-            else if (val.type === "string") {
-                out[attr.type] = attr.value.value;
-            }
-            else if (val.type === "number") {
-                out[attr.type] = parseFloat(attr.value.value);
-            }
-            else {
-                out[attr.type] = attr.value;
-            }
-        }
-    }
-    return out;
-};
-/*
-reduce_strings([
-    { type:'string', value:'A' },
-    { type:'string', value:'B' },
-    { type:'string', value:'C' },
-]) -> ["A","B","C"]
-*/
-var reduce_strings = function (x) { return x.map(function (y) { return y.value; }); };
-/*
-reduce_numbers([
-    { type:'string', value:'1.1' },
-    { type:'string', value:'2.2' },
-    { type:'string', value:'3.3' },
-]) -> ["1.1","2.2","3.3"]
-*/
-var reduce_numbers = function (x) {
-    return x.map(function (y) { return parseFloat(y.value); });
 };

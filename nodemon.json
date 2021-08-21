@@ -1,0 +1,9 @@
+{
+    "watch": [],
+    "ignore": [],
+    "script": "pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
+    "options": {
+        "extensions": ["js", "pegjs"],
+        "exec": "npx"
+    }
+}

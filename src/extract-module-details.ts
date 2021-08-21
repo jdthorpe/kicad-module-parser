@@ -1,32 +1,40 @@
-import { parse } from "../module-parser";
+import { parse } from "./module-parser";
+import { reduce_strings, reduce_numbers, combine } from "./utils";
 import {
     kicad_module,
-    node,
+    n_container,
     pad,
     fp_shape,
     text_effects,
     JUSTIFY,
     fp_text,
     TEXT_TYPE,
+    n_primitive,
+    n_array,
 } from "../types";
 
 export function parse_module(x: string): kicad_module {
+    const NODE: n_container = parse(x, { startRule: "module" });
+    return simplify_module(NODE);
+}
+
+export function simplify_module(NODE: n_container): kicad_module {
     const module_data: kicad_module = {
         pads: [],
         text: [],
         shapes: [],
     };
+    const value = NODE.value;
+    if (!(value instanceof Array)) throw "unexpected module value type";
 
-    const NODE: node = parse(x);
-
-    for (const part of NODE.value as node[]) {
+    for (const part of value) {
         switch (part.type) {
             case "module_attribute":
-                if ((part.value as node).value === "smd") {
+                if ((part.value as n_primitive).value === "smd") {
                     module_data.smd = true;
                     break;
                 }
-                if ((part.value as node).value === "virtual") {
+                if ((part.value as n_primitive).value === "virtual") {
                     module_data.virtual = true;
                     break;
                 }
@@ -36,15 +44,16 @@ export function parse_module(x: string): kicad_module {
                 module_data.layer = reduce_strings(part.value as node[]);
                 break;
             case "tags":
-                if ((part.value as node).type == "array") {
+                if ((part.value as n_primitive | n_array).type == "array") {
                     module_data.tags = reduce_strings(
                         (part.value as node).value as node[]
                     );
                     break;
                 }
                 if ((part.value as node).type == "string") {
-                    module_data.tags = ((part.value as node)
-                        .value as string).split(" ");
+                    module_data.tags = (
+                        (part.value as node).value as string
+                    ).split(" ");
                     break;
                 }
                 console.log(
@@ -104,6 +113,7 @@ export function parse_module(x: string): kicad_module {
                 console.log("unhandled part: " + JSON.stringify(part));
         }
     }
+
     return module_data;
 }
 
@@ -135,9 +145,10 @@ const process_pad = (pad: node): pad => {
                     out.drill.offset = combine(out.drill.offset);
                 }
                 break;
+            case "rect_delta":
             case "at":
                 // out.at = (attr.value as node[]).reduce((attr:node,val:any)=>{ val[attr.type] = attr.value ; return val}, {})
-                out.at = combine(attr.value as node[]);
+                out[attr.type] = combine(attr.value as node[]);
                 break;
             case "layer":
             case "layers":
@@ -145,6 +156,11 @@ const process_pad = (pad: node): pad => {
                 break;
 
             // floats
+
+            case "chamfer_ratio":
+            case "roundrect_rratio":
+            case "die_length":
+
             case "solder_mask_margin":
             case "solder_paste_margin":
             case "solder_paste_ratio":
@@ -163,8 +179,14 @@ const process_pad = (pad: node): pad => {
                 out[attr.type] = parseInt((attr.value as node).value as string);
                 break;
 
+            case "tstamp":
+            case "locked":
+                out[attr.type] = attr.value;
+                break;
+
             default:
                 console.log("unhandled pad attribute: ", attr.type);
+                process.exit();
         }
     }
 
@@ -207,13 +229,9 @@ const process_fp_shape = (shape: node): fp_shape => {
                 out.layers = reduce_strings(attr.value as node[]);
                 break;
             case "width":
-                out.width = (attr.value as node).value;
-                break;
             case "tstamp":
-                out.tstamp = (attr.value as node).value;
-                break;
             case "status":
-                out.status = (attr.value as node).value;
+                out[attr.type] = (attr.value as node).value;
                 break;
             default:
                 console.log("unhandled shape attribute: ", attr);
@@ -276,63 +294,3 @@ const process_fp_text = (text: node): fp_text => {
 
     return out as fp_text;
 };
-
-//--------------------------------------------------
-// utility functions
-//--------------------------------------------------
-
-/*
-combine([
-    { type:'a', value:1 },
-    { type:'b', value:2 },
-    { type:'c', value:3 },
-]) -> {'a':1, 'b':2, 'c':3}
-*/
-
-const combine = (x: node[]): any => {
-    const out: any = {};
-
-    for (let attr of x) {
-        let val = attr.value;
-        if (!attr.value) {
-            out[attr.type] = true;
-            continue;
-        }
-        if (typeof val === "string") {
-            out[attr.type] = attr.value;
-        } else {
-            if (val instanceof Array) {
-                out[attr.type] = attr.value;
-            } else if (val.type === "string") {
-                out[attr.type] = (attr.value as node).value!;
-            } else if (val.type === "number") {
-                out[attr.type] = parseFloat(
-                    (attr.value as node).value! as string
-                );
-            } else {
-                out[attr.type] = attr.value;
-            }
-        }
-    }
-    return out;
-};
-
-/*
-reduce_strings([
-    { type:'string', value:'A' },
-    { type:'string', value:'B' },
-    { type:'string', value:'C' },
-]) -> ["A","B","C"]
-*/
-
-const reduce_strings = (x: node[]) => x.map((y) => y.value as string);
-
-/*
-reduce_numbers([
-    { type:'string', value:'1.1' },
-    { type:'string', value:'2.2' },
-    { type:'string', value:'3.3' },
-]) -> ["1.1","2.2","3.3"]
-*/
-const reduce_numbers = (x: node[]) =>
-    x.map((y) => parseFloat(y.value as string));
