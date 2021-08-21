@@ -1,8 +1,8 @@
 # Convert Kicad Board and Module files to JSON
 
-Do you love working with S-Expressions? Me either. Convert board and module
-files to JSON or YAML and use your favorite tools to work with board and
-module file data!
+Do you love working with S-Expressions? Me either. Convert your Kicad board
+and module files to JSON or YAML and use your favorite tools to work with
+your Kicad board and module file data!
 
 ## CLI Usage
 
@@ -73,6 +73,6 @@ these variables are generally taken from the cpp parsers or from obvious
 neumonics. For example, `(xy 1.1 2.2)` becomes `{"xy":{"x":1.1, "y":2.2}}`.
 
 Finally, There are a handfule of sub-parsers and thing I was not personally
-interested in (such as page formatting info) which result in a value like
+interested in (such as page formatting) which result in a value like
 `"page info": "unsupported"`. If you despirately need page info (or any other
 unsupported features), I welcome your pull request!
