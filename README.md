@@ -30,7 +30,7 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         Output file (defaults to input file with '.json' or '.yaml' extension)
   -v, --verbose         verbose output
-  --yaml                set output to yaml`
+  --yaml                set output to yaml
 ```
 
 ## Javascript / Typescript Usage
