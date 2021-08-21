@@ -3,6 +3,11 @@
     "version": "1.0.0",
     "main": "index.js",
     "author": "Jason Thorpe",
+    "keywords": [
+        "kicad",
+        "json",
+        "yaml"
+    ],
     "license": "MIT",
     "scripts": {
         "build": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
