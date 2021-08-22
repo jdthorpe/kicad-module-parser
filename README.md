@@ -51,7 +51,7 @@ parse.board(kicad_pcb_contents)
 
 ### Background
 
-The `kicad_mod` and `kicad_pcb` files are S-Expressions based, and which have
+The `kicad_mod` and `kicad_pcb` files are S-Expressions based which have
 the general format `(name  ...contents )` where the contents are either
 individual values or nested s-expressions (e.g. `( pts (xy 1 1) (xy 2 2))`).
 Some s-expressions are singletons, such as the `pts` expression within a
@@ -149,6 +149,76 @@ kicad_pcb:
       zones: 0
       modules: 172
       nets: 143
+```
+
+## `bare` Format Details
+
+There are 4 primitives in the bare format which have type `"string"`, `"hex"`,
+`"number"` and `"boolean"`, such as:
+
+```json
+{ "type": "string", "value": "GND" }
+{ "type": "hex", "value": "1234ABCD" }
+{ "type": "number", "value": "3.2" } // yes, numbers are represented as strings
+{ "type": "boolean", "value": true }
+```
+
+The array type has a `type` attribute of `"array"` and a `value` contianing an
+aray of primitives, such as:
+
+```json
+{ "type": "array", "value": [ { "type": "string", "value": "GND" } ] }
+```
+
+The `container` type is like the `array` type but it's `type` attribute has a
+value other than `"string"`, `"hex"`, `"number"`, `"boolean"` or `"array"`, and
+the value can contain any type (including other containers), or an array
+containing any of the types, sucy as:
+
+```json
+{
+  "type": "pts",
+  "value": [
+    {
+      "type": "xy",
+      "value": [
+        {
+          "type": "x",
+          "value": {
+            "type": "number",
+            "value": "117.4"
+          }
+        },
+        {
+          "type": "y",
+          "value": {
+            "type": "number",
+            "value": "28"
+          }
+        }
+      ]
+    },
+    {
+      "type": "xy",
+      "value": [
+        {
+          "type": "x",
+          "value": {
+            "type": "number",
+            "value": "123.85"
+          }
+        },
+        {
+          "type": "y",
+          "value": {
+            "type": "number",
+            "value": "28"
+          }
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ## Final notes
