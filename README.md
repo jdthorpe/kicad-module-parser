@@ -96,7 +96,7 @@ value:
           value: '172'
 ```
 
-### Compact Notation
+### `compact` Notation
 
 In the compact format, s-expression types and values from the bare format are
 used as key-value pairs of a JSON object This works for s-expressions that are
@@ -127,7 +127,7 @@ kicad_pcb:
     nets: 143
 ```
 
-### Long Notation
+### `long` Notation
 
 The `long` format is a hybrid between the Compact and Bare formats, and
 recoginses that module and board files are special, in that nearly every file
