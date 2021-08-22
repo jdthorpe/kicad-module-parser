@@ -177,45 +177,21 @@ containing any of the types, sucy as:
 
 ```json
 {
-  "type": "pts",
+  "type": "xy",
   "value": [
     {
-      "type": "xy",
-      "value": [
-        {
-          "type": "x",
-          "value": {
-            "type": "number",
-            "value": "117.4"
-          }
-        },
-        {
-          "type": "y",
-          "value": {
-            "type": "number",
-            "value": "28"
-          }
-        }
-      ]
+      "type": "x",
+      "value": {
+        "type": "number",
+        "value": "117.4"
+      }
     },
     {
-      "type": "xy",
-      "value": [
-        {
-          "type": "x",
-          "value": {
-            "type": "number",
-            "value": "123.85"
-          }
-        },
-        {
-          "type": "y",
-          "value": {
-            "type": "number",
-            "value": "28"
-          }
-        }
-      ]
+      "type": "y",
+      "value": {
+        "type": "number",
+        "value": "28"
+      }
     }
   ]
 }
