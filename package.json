@@ -19,22 +19,22 @@
         "test": "node test/"
     },
     "devDependencies": {
+        "@types/argparse": "^2.0.10",
         "@types/fs-extra": "^9.0.1",
+        "@types/js-yaml": "^4.0.2",
         "@types/klaw": "^3.0.1",
         "@types/through2": "^2.0.36",
+        "pegjs": "^0.10.0",
+        "typescript": "^4.3.5"
+    },
+    "dependencies": {
         "ajv": "^8.6.2",
+        "argparse": "^2.0.1",
         "chalk": "^4.1.2",
         "fs-extra": "^9.0.1",
         "js-yaml": "^4.1.0",
         "klaw": "^3.0.0",
-        "pegjs": "^0.10.0",
-        "through2": "^4.0.2",
-        "typescript": "^4.3.5"
-    },
-    "dependencies": {
-        "@types/argparse": "^2.0.10",
-        "@types/js-yaml": "^4.0.2",
-        "argparse": "^2.0.1"
+        "through2": "^4.0.2"
     },
     "bin": {
         "k2j": "./bin/k2j"
