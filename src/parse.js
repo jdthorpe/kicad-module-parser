@@ -19,7 +19,7 @@ function parse_verbose(mod, options) {
         data = module_parser_1.parse(mod, options);
     }
     catch (err) {
-        console.log(chalk_1.default.bgRed.black(`Falied to parse module`));
+        console.log(chalk_1.default.bgRed.black(`Falied to parse module with options: ${JSON.stringify(options)}`));
         throw err;
     }
     let sdata;

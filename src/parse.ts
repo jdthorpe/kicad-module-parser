@@ -2,9 +2,8 @@ import { parse as _parse } from "./module-parser";
 import { post_process } from "./utils";
 import { n_container } from "../types";
 import chalk from "chalk";
-
 interface options {
-    filetype: "module" | "board";
+    startRule: "module" | "board";
     [prop: string]: any;
 }
 
@@ -20,7 +19,13 @@ export function parse_verbose(mod: string, options: options) {
     try {
         data = _parse(mod, options);
     } catch (err) {
-        console.log(chalk.bgRed.black(`Falied to parse module`));
+        console.log(
+            chalk.bgRed.black(
+                `Falied to parse module with options: ${JSON.stringify(
+                    options
+                )}`
+            )
+        );
         throw err;
     }
 
