@@ -10,10 +10,10 @@ When installed globally (`npm i -g kicad-module-parser`), npm installs the
 `k2j` command line tool, which converts your kicad files to json like so:
 
 ```sh
-k2j -f ./my_module_file.kicad_mod
+k2j ./my_module_file.kicad_mod
 # creates ./my_module_file.json
 
-k2j -f ./my_board_file.kicad_pcb
+k2j ./my_board_file.kicad_pcb
 # creates ./my_board_file.json
 ```
 
