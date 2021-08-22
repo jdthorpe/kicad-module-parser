@@ -20,15 +20,19 @@ k2j -f ./my_board_file.kicad_pcb
 Use the `-h` flag for the usual help:
 
 ```txt
-usage: k2j [-h] -f FILE [-o OUTPUT] [-v] [--yaml]
+usage: index.js [-h] [-o OUTPUT] [-f {compact,long,bare}] [-v] [--yaml] file
 
-Convert Kicad board and pcb files to JSON/YAML
+Convert Kicad board and module files to JSON/YAML
+
+positional arguments:
+  file                  The Kicad pcb or module file to convert to json
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FILE, --file FILE  The Kicad pcb or module file to convert to json
   -o OUTPUT, --output OUTPUT
                         Output file (defaults to input file with '.json' or '.yaml' extension)
+  -f {compact,long,bare}, --format {compact,long,bare}
+                        Set the output format
   -v, --verbose         verbose output
   --yaml                set output to yaml
 ```
@@ -43,20 +47,62 @@ parse.module(kicad_mod_contents)
 parse.board(kicad_pcb_contents)
 ```
 
-## About the output
+## Output Formats
 
-`kicad_mod` and `kicad_pcb` files are S-Expressions, which, simply put, are
-not JSON. Converting them to JSON therefore requires taking an opion on how
-to do the conversion. This is a brief explanation of the opinions expressed
-in this module.
+### Background
 
-Wihtin the Kicad Module and Board files, s-expressions start with a token
-such as `( kicad_mod ... )` or `(xyz 1 2 3)`, which this module uses as keys
-in a JSON object such as `{"kicad_mod": ...}` or `{"xyz": ... }`. This works
-for s-expressions that are singletons, but for expressions like `(add_net
-GND) (add_net +3v3)` which may appear multiple times within the parent
-s-expression, the contents of the expression are included in an array of the
-same name, such as :
+The `kicad_mod` and `kicad_pcb` files are S-Expressions based, and which have
+the general format `(name  ...contents )` where the contents are either
+individual values or nested s-expressions (e.g. `( pts (xy 1 1) (xy 2 2))`).
+Some s-expressions are singletons, such as the `pts` expression within a
+`polygon` and others can appear multiple times, such as the individual `xy`
+pairs within an array of points.
+
+### `bare` Notation
+
+In the `bare` notation the first token in the s-expresion appears as it's `type`
+attribute, and the remaining sub-expression appear in the `value` attribute.
+This format is quite literal, but generally hard to work with.  Here is a brief
+example (in yaml format):
+
+```yaml
+type: kicad_pcb
+value:
+  - type: version
+    value:
+      type: number
+      value: '20171130'
+  - type: general
+    value:
+      - type: thickness
+        value:
+          type: number
+          value: '1.6'
+      - type: drawings
+        value:
+          type: number
+          value: '605'
+      - type: tracks
+        value:
+          type: number
+          value: '2555'
+      - type: zones
+        value:
+          type: number
+          value: '0'
+      - type: modules
+        value:
+          type: number
+          value: '172'
+```
+
+### Compact Notation
+
+In the compact format, s-expression types and values from the bare format are
+used as key-value pairs of a JSON object This works for s-expressions that are
+singletons, but for expressions like `(add_net GND) (add_net +3v3)` which may
+appear multiple times within the parent s-expression, the contents of the
+expression are included in an array of the same name, such as :
 
 ```json
 {
@@ -67,12 +113,51 @@ same name, such as :
 }
 ```
 
-Some s-expression have children (other than the name of the s-expression)
-which are simple tokens such as strings, net names, and numbers. Names for
-these variables are generally taken from the cpp parsers or from obvious
-neumonics. For example, `(xy 1.1 2.2)` becomes `{"xy":{"x":1.1, "y":2.2}}`.
+Here is the same example from above in compact format:
 
-Finally, There are a handfule of sub-parsers and thing I was not personally
+```yaml
+kicad_pcb:
+  version: 20171130
+  general:
+    thickness: 1.6
+    drawings: 605
+    tracks: 2555
+    zones: 0
+    modules: 172
+    nets: 143
+```
+
+### Long Notation
+
+The `long` format is a hybrid between the Compact and Bare formats, and
+recoginses that module and board files are special, in that nearly every file
+will have *many* repeating entities (such as `gr_lines`) where preserving the
+order of the entites may be useful.  Hence, the immediate children of boards and
+modules (and modules nested within boards) are represent in bare format, and
+everything else is represented in compact format. Here is the same example from
+above in long format:
+
+```yaml
+kicad_pcb:
+  - type: version
+    value: 20171130
+  - type: general
+    value:
+      thickness: 1.6
+      drawings: 605
+      tracks: 2555
+      zones: 0
+      modules: 172
+      nets: 143
+```
+
+## Final notes
+
+There are a handfule of sub-parsers and things I was not personally
 interested in (such as page formatting) which result in a value like
 `"page info": "unsupported"`. If you despirately need page info (or any other
 unsupported features), I welcome your pull request!
+
+If your board or module results in an error, please put it in a github repo (or
+a minimal example that raises the same error), and open an issue with a link to
+that github repo.

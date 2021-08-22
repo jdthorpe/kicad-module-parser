@@ -7,13 +7,22 @@ interface options {
     [prop: string]: any;
 }
 
-export function parse(mod: string, options: options) {
+export function parse(
+    mod: string,
+    options: options,
+    format: "compact" | "long" | "bare"
+) {
     const data: n_container = _parse(mod, options);
-    const sdata = post_process(data);
+    if (format === "bare") return data;
+    const sdata = post_process(data, format === "long");
     return Object.fromEntries([[sdata.type, sdata.value]]);
 }
 
-export function parse_verbose(mod: string, options: options) {
+export function parse_verbose(
+    mod: string,
+    options: options,
+    format: "compact" | "long" | "bare"
+) {
     let data: n_container;
 
     try {
@@ -28,10 +37,11 @@ export function parse_verbose(mod: string, options: options) {
         );
         throw err;
     }
+    if (format === "bare") return data;
 
     let sdata;
     try {
-        sdata = post_process(data);
+        sdata = post_process(data, format === "long");
     } catch (err) {
         console.log(
             chalk.bgRed.black("Something Went Wrong with post_process")

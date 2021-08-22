@@ -26,7 +26,7 @@ function simplify_primitive(x) {
     }
 }
 // const itype = "pcb_text_width";
-const post_process = (x) => {
+const post_process = (x, long = true) => {
     // depth first transformation
     let current = x;
     let next;
@@ -40,7 +40,14 @@ const post_process = (x) => {
                 stack.map((x) => `${x[0].type}[${x[1]}]`).join("/") +
                 `/${current.type}[${i}]`);
         if (i >= current.value.length) {
-            let out = _process(values, current.type, stack);
+            let out;
+            if (long &&
+                (current.type === "kicad_pcb" || current.type === "module")) {
+                out = { type: current.type, value: values };
+            }
+            else {
+                out = _process(values, current.type, stack);
+            }
             let SI = stack.pop();
             if (typeof SI === "undefined") {
                 verbose &&

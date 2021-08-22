@@ -48,7 +48,7 @@ type stackitem = [
 ];
 
 // const itype = "pcb_text_width";
-export const post_process = (x: n_container): any => {
+export const post_process = (x: n_container, long: boolean = true): any => {
     // depth first transformation
 
     let current: n_container = x;
@@ -68,7 +68,15 @@ export const post_process = (x: n_container): any => {
             );
 
         if (i >= current.value.length) {
-            let out = _process(values, current.type, stack);
+            let out;
+            if (
+                long &&
+                (current.type === "kicad_pcb" || current.type === "module")
+            ) {
+                out = { type: current.type, value: values };
+            } else {
+                out = _process(values, current.type, stack);
+            }
             let SI = stack.pop();
             if (typeof SI === "undefined") {
                 verbose &&

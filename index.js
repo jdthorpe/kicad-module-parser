@@ -15,6 +15,6 @@ exports.parse = void 0;
 __exportStar(require("./types"), exports);
 const parse_1 = require("./src/parse");
 exports.parse = {
-    module: (x, options) => parse_1.parse(x, { startRule: "module", ...options }),
-    board: (x, options) => parse_1.parse(x, { startRule: "board", ...options }),
+    module: (x, options = {}, format = "compact") => parse_1.parse(x, { startRule: "module", ...options }, format),
+    board: (x, options = {}, format = "compact") => parse_1.parse(x, { startRule: "board", ...options }, format),
 };

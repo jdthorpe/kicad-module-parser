@@ -21,7 +21,7 @@ function process_file(args) {
     }
     const mod = fs_extra_1.default.readFileSync(args.file).toString();
     let sdata;
-    sdata = parse_1.parse_verbose(mod, { startRule: filetype });
+    sdata = parse_1.parse_verbose(mod, { startRule: filetype }, args.format);
     if (args.yaml) {
         const outfile = args.output || args.file.slice(0, -10) + ".yaml";
         fs_extra_1.default.writeFileSync(outfile, js_yaml_1.default.dump(sdata, { noCompatMode: true }));
