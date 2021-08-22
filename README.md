@@ -6,7 +6,7 @@ your Kicad board and module file data!
 
 ## CLI Usage
 
-When installed globally (`npm i -g kicad-module-parser`), npm installs the
+When installed globally (`npm i -g kicad-to-json`), npm installs the
 `k2j` command line tool, which converts your kicad files to json like so:
 
 ```sh
