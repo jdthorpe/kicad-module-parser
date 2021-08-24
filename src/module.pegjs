@@ -1078,8 +1078,8 @@ x_y =
   }
 
 _start 
-    = "(" _ ("start" / "center") _ value:x_y _ ")" { 
-        return { type:"center", value }
+    = "(" _ type: ("start" / "center") _ value:x_y _ ")" { 
+        return { type, value }
 }
 center 
     = "(" _ type:"center" _ value:x_y _ ")" {
