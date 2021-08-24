@@ -11,10 +11,10 @@ When installed globally (`npm i -g kicad-to-json`), npm installs the
 
 ```sh
 k2j ./my_module_file.kicad_mod
-# creates ./my_module_file.json
+# creates ./my_module_file.json in compact format
 
-k2j ./my_board_file.kicad_pcb
-# creates ./my_board_file.json
+k2j ./my_board_file.kicad_pcb --yaml --format long
+# creates ./my_board_file.yaml in long format
 ```
 
 Use the `-h` flag for the usual help:
@@ -43,8 +43,12 @@ User friendly data
 
 ```ts
 import { parse } from "kicad-module-parser"
-parse.module(kicad_mod_contents)
-parse.board(kicad_pcb_contents)
+
+// convert the module (string) to compact format
+const my_module = parse.module(kicad_mod_contents_string)
+
+// convert the board (string) to long format
+const my_board = parse.board(kicad_pcb_contents_string,"long")
 ```
 
 ## Output Formats

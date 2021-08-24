@@ -18,7 +18,7 @@ export function process_file(args: Args) {
 
     const mod: string = fse.readFileSync(args.file).toString();
     let sdata: any;
-    sdata = parse_verbose(mod, { startRule: filetype }, args.format);
+    sdata = parse_verbose(mod, args.format, { startRule: filetype });
 
     if (args.yaml) {
         const outfile = args.output || args.file.slice(0, -10) + ".yaml";

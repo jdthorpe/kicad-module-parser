@@ -9,8 +9,8 @@ interface options {
 
 export function parse(
     mod: string,
-    options: options,
-    format: "compact" | "long" | "bare"
+    format: "compact" | "long" | "bare",
+    options: options
 ) {
     const data: n_container = _parse(mod, options);
     if (format === "bare") return data;
@@ -20,8 +20,8 @@ export function parse(
 
 export function parse_verbose(
     mod: string,
-    options: options,
-    format: "compact" | "long" | "bare"
+    format: "compact" | "long" | "bare",
+    options: options
 ) {
     let data: n_container;
 

@@ -7,7 +7,7 @@ exports.parse_verbose = exports.parse = void 0;
 const module_parser_1 = require("./module-parser");
 const utils_1 = require("./utils");
 const chalk_1 = __importDefault(require("chalk"));
-function parse(mod, options, format) {
+function parse(mod, format, options) {
     const data = module_parser_1.parse(mod, options);
     if (format === "bare")
         return data;
@@ -15,7 +15,7 @@ function parse(mod, options, format) {
     return Object.fromEntries([[sdata.type, sdata.value]]);
 }
 exports.parse = parse;
-function parse_verbose(mod, options, format) {
+function parse_verbose(mod, format, options) {
     let data;
     try {
         data = module_parser_1.parse(mod, options);

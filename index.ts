@@ -5,12 +5,12 @@ import { parse as _parse } from "./src/parse";
 export const parse = {
     module: (
         x: string,
-        options: any = {},
-        format: "compact" | "long" | "bare" = "compact"
-    ) => _parse(x, { startRule: "module", ...options }, format),
+        format: "compact" | "long" | "bare" = "compact",
+        options: any = {}
+    ) => _parse(x, format, { startRule: "module", ...options }),
     board: (
         x: string,
-        options: any = {},
-        format: "compact" | "long" | "bare" = "compact"
-    ) => _parse(x, { startRule: "board", ...options }, format),
+        format: "compact" | "long" | "bare" = "compact",
+        options: any = {}
+    ) => _parse(x, format, { startRule: "board", ...options }),
 };
