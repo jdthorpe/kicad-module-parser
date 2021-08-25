@@ -1061,8 +1061,8 @@ function peg$parse(input, options) {
         },
       peg$c585 = "center",
       peg$c586 = peg$literalExpectation("center", false),
-      peg$c587 = function(value) { 
-              return { type: "center", value } // yep, "center"
+      peg$c587 = function(type, value) { 
+              return { type, value } // yep, "center"
       },
       peg$c588 = "end",
       peg$c589 = peg$literalExpectation("end", false),
@@ -12903,7 +12903,7 @@ function peg$parse(input, options) {
                 }
                 if (s7 !== peg$FAILED) {
                   peg$savedPos = s0;
-                  s1 = peg$c587(s5);
+                  s1 = peg$c587(s3, s5);
                   s0 = s1;
                 } else {
                   peg$currPos = s0;
