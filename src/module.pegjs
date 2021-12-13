@@ -115,6 +115,7 @@ setup /* parseSetup */
         setup_array / 
         setup_hex / 
         defaults / 
+        pcbplotparams / 
         unsupported_setup) _ 
         )* 
     ")"{ 
@@ -214,8 +215,77 @@ DEFAULT_TEXT_DIMS
  / "fab_layers_text_dims"
  / "other_layers_text_dims"
 
+pcbplotparams
+ =  "(" _ 
+    type:"pcbplotparams" _ 
+     values:(
+        (pcbplotparams_flag / 
+        pcbplotparams_numeric / 
+        pcbplotparams_layerselection / 
+        pcbplotparams_outputdirectory) _ 
+        )* 
+    ")"{ 
+    return {type, value:values.map(x => x[0])}
+ }
+
+pcbplotparams_layerselection 
+    = "(" _ type:"layerselection" _ value:(string/symbol) _ ")" { 
+        return { type, value }
+    }
+
+pcbplotparams_outputdirectory
+    = "(" _ type:"outputdirectory" _ value:(string/symbol) _ ")" { 
+        return { type, value }
+    }
+
+pcbplotparams_numeric
+    = "(" _ type:PCBPLOTPARAMS_NUMERIC _ value:number _ ")" { return { type, value } }
+
+PCBPLOTPARAMS_NUMERIC
+ = "linewidth"
+ / "mode"
+ / "hpglpennumber"
+ / "hpglpenspeed"
+ / "hpglpendiameter"
+ / "hpglpenoverlay"
+ / "outputformat"
+ / "drillshape"
+ / "scaleselection"
+
+pcbplotparams_flag
+    = "(" _ type:PCBPLOTPARAMS_FLAG _ value:pcbplotparams_bool _ ")" { return { type, value } }
+
+PCBPLOTPARAMS_FLAG
+ = "disableapertmacros"
+ / "usegerberextensions"
+ / "usegerberattributes"
+ / "usegerberadvancedattributes"
+ / "creategerberjobfile"
+ / "svguseinch"
+ / "svgprecision"
+ / "excludeedgelayer"
+ / "plotframeref"
+ / "viasonmask"
+ / "useauxorigin"
+ / "dxfpolygonmode"
+ / "dxfimperialunits"
+ / "dxfusepcbnewfont"
+ / "psnegative"
+ / "psa4output"
+ / "plotreference"
+ / "plotvalue"
+ / "plotinvisibletext"
+ / "plotothertext"
+ / "sketchpadsonfab"
+ / "padsonsilk"
+ / "subtractmaskfromsilk"
+ / "mirror"
+
+pcbplotparams_bool
+  = value:("true" / "false"){ return { type: "boolean", value: value === "true" } }
+
 unsupported_setup
- = "(" _ type:("stackup"/"pcbplotparams") _ (expression _ )* ")" { 
+ = "(" _ type:("stackup") _ (expression _ )* ")" { 
      // console.log(`Warning: unsupported setup section ${type}`)
      return {type,value: { type: "string", value: "unsupported" } } 
 }
