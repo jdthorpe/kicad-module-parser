@@ -59,10 +59,14 @@ general_array_opt
 paper /* parsePAGE_INFO */
  =  "(" _ 
         ("page"/"paper") _ 
-        ((("custom"/"User") _ height:number _ width:number )/symbol) _ 
+        size:("A0"/"A1"/"A2"/"A3"/"A4"/"A5"/"A"/"B"/"C"/"D") _
         portrait:("portrait" _ )?
         ")" {
-    return {type: "page info", value: { type:"string", value:"unsupported" }}
+        const value = [
+            { type: "size", value: {type: "string", value: size } },
+            { type: "portrait", value: { type: "boolean", value: !!portrait } } 
+        ]
+    return {type: "page", value}
  }
 
 title_block /* parseTITLE_BLOCK */
