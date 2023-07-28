@@ -528,16 +528,26 @@ zone_connect_pads
     return { type, value }
 }
 
+generator
+    = "(" _
+        type:"generator" _
+        value:symbol _
+        ")" {
+            return { type, value }
+        }
 
 header /* parseHeader */
-  =  version:(header_version _ )?
-        "(" _ symbol _ (string/symbol) _ (string/symbol _)? ")"
+  =  "(" _ generator:symbol _ layer:(string/symbol) _ attr:(string/symbol _)? ")"
     {
-    var out = []
-    if(version)
-        out.push(version[0])
-    return out
-};
+        return {
+            type: "header",
+            value: {
+                generator: { type: "string", value: generator },
+                layer: { type: "string", value: layer },
+                attr: { type: "string", value: attr }
+            }
+        };
+    };
 
 header_version
  = "(" _
@@ -564,6 +574,8 @@ module  /* parseMODULE_unchecked */
 
 module_contents
     = version
+    / generator
+    / module_property
     / locked
     / placed
     / layer
@@ -720,11 +732,22 @@ COMMON_INT
     / "autoplace_cost180"
 
 module_attr
-    =   "(" _ "attr" _ value:("smd"/"virtual") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
+    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
         return  {
             type: "module_attribute",
             value: {type:"string",value},
             tags
+        }
+}
+
+module_property
+    =   "(" _ "property" _ key:string _ value:string ")" {
+        return  {
+            type: "module_property",
+            value: [
+                { type: "key", value: key },
+                { type: "value", value }
+            ]
         }
 }
 
@@ -766,8 +789,12 @@ fp_text
 // --------------------------------------------------
 
 fp_arc
-    =  "(" _ type:"fp_arc" _ center:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
-        const out = [ center, end]
+    =  "(" _ type:"fp_arc" _ start:start _ mid:(mid _ )? end:end _ angle:(angle _ )? generics:fp_generics  ")" {
+        const out = [start];
+        if (mid !== null) {
+            out.push(mid[0]);
+        }
+        out.push(end);
         if(angle !== null){
             out.push( angle[0])
         }
@@ -818,7 +845,7 @@ fp_poly
     }
 
 fp_generics
-    = generics:((layer / width / fill / tstamp / status) _ )* {
+    = generics:(( stroke / layer / width / fill / tstamp / status ) _ )* {
         return generics.map(x => x[0])
     }
 
@@ -832,7 +859,6 @@ pad
         no:(string/symbol)? _
         pad_type:pad_type _
         shape:pad_shape _
-        locked:("locked" _ )?
         attrs:(pad_attr _)* ")" {
         return {
             type: "pad",
@@ -840,7 +866,6 @@ pad
                 { type: "pad_id", value:no },
                 pad_type,
                 shape,
-                { type: "locked", value: { type: "boolean", value: !!locked } },
                   ...attrs.map(x => x[0])
             ]
         }
@@ -856,8 +881,12 @@ pad_shape
         return { type: "pad_shape", value: { type: "string", value } }
     }
 
+locked_group
+    = "(" _ "locked" _ ")" { return { type: "locked", value: { type: "boolean", value: true }  }}
+
 pad_attr
     = size
+    / locked_group
     / at
     / rect_delta
     / drill
@@ -1122,6 +1151,35 @@ fill
         return { type, value }
     }
 
+stroke
+    = "(" _ type:"stroke" _  width:width _ stroke_type:stroke_type _ ")" {
+        return { type,
+                value:
+                [
+                    width,
+                    stroke_type,
+                ]
+         }
+    }
+
+stroke_type
+    = "(" _ type:"type" _  value:STROKE_TYPES _ ")" {
+        return { type, value }
+    }
+
+STROKE_TYPES
+    = value:(
+        "dash" /
+        "dash_dot" /
+        "dash_dot_dot" /
+        "dot" /
+        "default" /
+        "solid"
+    ) {
+        return { type: "string", value}
+    }
+
+
 width
     = "(" _ type:"width" _  value:number _ ")" {
         return { type, value }
@@ -1152,11 +1210,11 @@ x_y =
   }
 
 _start
-    = "(" _ type: ("start" / "center") _ value:x_y _ ")" {
+    = "(" _ type: ("start" / "center" ) _ value:x_y _ ")" {
         return { type, value } // yep, "center"
 }
 center
-    = "(" _ type:"center" _ value:x_y _ ")" {
+    = "(" _ type: ( "center" ) _ value:x_y _ ")" {
         return { type, value }
     }
 end
