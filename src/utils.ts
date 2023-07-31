@@ -3,9 +3,9 @@
 //--------------------------------------------------
 import {
     n_array,
+    n_container,
     n_named_value,
     n_primitive,
-    n_container,
     node,
 } from "../types";
 
@@ -97,7 +97,7 @@ export const post_process = (x: n_container, long: boolean = true): any => {
             continue;
         }
 
-        next = current.value[i];
+        next = current.value[i]!;
         verbose && console.log("curent", current);
         verbose && console.log("next", next);
         /* inspect: 
@@ -277,10 +277,10 @@ function gather(values: { type: string; value: any }[], key: string) {
     // splice out the old vals
     const vals = [];
     for (let indx of indexes) {
-        vals.unshift(values.splice(indx, 1)[0].value);
+        vals.unshift(values.splice(indx, 1)[0]!.value);
     }
     // insert the new values array
-    values.splice(indexes[indexes.length - 1], 0, { type: key, value: vals });
+    values.splice(indexes[indexes.length - 1]!, 0, { type: key, value: vals });
 }
 
 function gather_all(
