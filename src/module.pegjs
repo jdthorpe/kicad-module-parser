@@ -614,7 +614,7 @@ placed  = "placed"{ return { type: "placed", value: { type: "boolean", value: tr
 //     }
 // }
 
-layer = "(" _ type: "layer" _ value:(LAYER / symbol) _ ")" {
+layer = "(" _ type: "layer" _ "\""? value:(LAYER / symbol) "\""? _ ")" {
     return { type, value }
 }
 
