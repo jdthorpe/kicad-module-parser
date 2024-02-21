@@ -1275,10 +1275,11 @@ function peg$parse(input, options) {
                   value: [ value, ...values.map(x => x[0])]
               }
           },
-      peg$c752 = /^[^ ();'"\n]/,
-      peg$c753 = peg$classExpectation([" ", "(", ")", ";", "'", "\"", "\n"], true, false),
+      peg$c752 = /^[^ ();'\n]/,
+      peg$c753 = peg$classExpectation([" ", "(", ")", ";", "'", "\n"], true, false),
       peg$c754 = function(value) {
-             return { type:"string", value: "SYM" + value }
+             return {type:"string",value}
+
          },
       peg$c755 = peg$otherExpectation("whitespace"),
       peg$c756 = /^[ \t\n\r]/,
