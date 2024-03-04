@@ -122,6 +122,7 @@ function _process(values, type, stack) {
                     "page info",
                     "page",
                     "paper",
+                    "host",
                     "title_block",
                     "setup",
                     "layers",
@@ -209,7 +210,7 @@ function gather(values, key) {
         {type:'b', value: 1},
     ]
     key = 'b'
-    
+
     ... becomes ...
 
     value = [
@@ -246,7 +247,7 @@ function gather_all(values, singletons) {
         {type:'b', value: 1},
     ]
     singletons = 'a'
-    
+
     ... becomes ...
 
     value = {

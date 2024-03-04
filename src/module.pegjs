@@ -538,13 +538,18 @@ generator
         }
 
 host
-    = "(" _
-        type:"host" _
-        value:symbol _
-        version: (string/symbol) _
+ = "(" _
+        "host" _
+        application:symbol _
+        version:(string/symbol) _
         ")" {
-            return { type, value, version }
-        }
+        const value = [
+            { type: "application", value: application},
+            { type: "version", value: version}
+        ]
+
+    return { type: "host", value }
+}
 
 header /* parseHeader */
   =  "(" _ generator:symbol _ layer:(string/symbol) _ attr:(string/symbol _)? ")"

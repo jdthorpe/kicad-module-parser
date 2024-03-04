@@ -684,9 +684,14 @@ function peg$parse(input, options) {
               },
       peg$c430 = "host",
       peg$c431 = peg$literalExpectation("host", false),
-      peg$c432 = function(type, value, version) {
-                  return { type, value, version }
-              },
+      peg$c432 = function(application, version) {
+              const value = [
+                  { type: "application", value: application},
+                  { type: "version", value: version}
+              ]
+
+          return { type: "host", value }
+      },
       peg$c433 = function(generator, layer, attr) {
               return {
                   type: "header",
@@ -8086,7 +8091,7 @@ function peg$parse(input, options) {
                     }
                     if (s9 !== peg$FAILED) {
                       peg$savedPos = s0;
-                      s1 = peg$c432(s3, s5, s7);
+                      s1 = peg$c432(s5, s7);
                       s0 = s1;
                     } else {
                       peg$currPos = s0;
