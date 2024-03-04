@@ -541,7 +541,7 @@ host
     = "(" _
         type:"host" _
         value:symbol _
-        version: string _
+        version: (string/symbol) _
         ")" {
             return { type, value, version }
         }

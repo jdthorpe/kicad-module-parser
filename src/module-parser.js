@@ -8071,6 +8071,9 @@ function peg$parse(input, options) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
                 s7 = peg$parsestring();
+                if (s7 === peg$FAILED) {
+                  s7 = peg$parsesymbol();
+                }
                 if (s7 !== peg$FAILED) {
                   s8 = peg$parse_();
                   if (s8 !== peg$FAILED) {
