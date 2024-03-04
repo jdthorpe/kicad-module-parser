@@ -2,9 +2,10 @@
 board /* parseBOARD_unchecked */
     = "(" _
     type: "kicad_pcb" _
-    header:header _
     rest:( val:(
         general /
+        host /
+        version /
         paper /
         title_block /
         board_layers /
@@ -26,7 +27,7 @@ board /* parseBOARD_unchecked */
         zone /
         target ) _ {return val})*
     ")" _ {
-        return {type, value: [...header, ...rest]}
+        return {type, value: rest}
 };
 
 
@@ -536,6 +537,20 @@ generator
             return { type, value }
         }
 
+host
+ = "(" _
+        "host" _
+        application:symbol _
+        version:(string/symbol) _
+        ")" {
+        const value = [
+            { type: "application", value: application},
+            { type: "version", value: version}
+        ]
+
+    return { type: "host", value }
+}
+
 header /* parseHeader */
   =  "(" _ generator:symbol _ layer:(string/symbol) _ attr:(string/symbol _)? ")"
     {
@@ -549,13 +564,13 @@ header /* parseHeader */
         };
     };
 
-header_version
- = "(" _
-    type:"version" _
-    value:digits _
-    ")" {
-        return { type, value: { type:"number", value } }
-    }
+version
+    = "(" _
+        type:"version" _
+        value:digits _
+        ")" {
+            return { type, value: { type:"number", value } }
+        }
 
 module  /* parseMODULE_unchecked */
     = _  "(" _
@@ -600,7 +615,6 @@ module_contents
     / zone;
 
 
-version = "(" _ type: "version" _ value:symbol _ ")" { return { type, value }}
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
 placed  = "placed"{ return { type: "placed", value: { type: "boolean", value: true }}}
 
@@ -1345,7 +1359,7 @@ _ "whitespace"
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number
-    = val:$([-+]?  (Real/Fraction/digits)) {
+    = val:$([-+]?  (Exponential/Real/Fraction/digits)) {
         return { type:"number", value:val }
     }
 
@@ -1356,8 +1370,12 @@ number_
 Real
   = val:$((digits("."(digits?))?) / "." digits) {
       return { type:"real", value:val }
-
   }
+
+Exponential
+    = val:$((digits / Real) ("e" / "E") ("+" / "-")? digits) {
+      return { type:"exponential", value:val }
+    }
 
 Fraction
   = n:digits "/" d:digits {

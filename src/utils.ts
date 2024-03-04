@@ -87,7 +87,7 @@ export const post_process = (x: n_container, long: boolean = true): any => {
                 return out;
             }
             [current, i, values] = SI;
-            /* inspect: 
+            /* inspect:
             if (current.type === itype) {
                 console.log(`return to ${current.type} ${i} with value:`, out);
                 console.log("from", current.value[i], "\n======");
@@ -100,12 +100,12 @@ export const post_process = (x: n_container, long: boolean = true): any => {
         next = current.value[i]!;
         verbose && console.log("curent", current);
         verbose && console.log("next", next);
-        /* inspect: 
-        if (current.type === itype) 
+        /* inspect:
+        if (current.type === itype)
             console.log(`${current.type} i: `, i, next, "\n======");
             */
         if (Array.isArray(next.value)) {
-            /* inspect: 
+            /* inspect:
             if (current.type === itype) console.log("recurse\n>>>");
             */
             // recurse
@@ -161,6 +161,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                     "page info",
                     "page",
                     "paper",
+                    "host",
                     "title_block",
                     "setup",
                     "layers",
@@ -228,7 +229,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                 );
             }
 
-            /* inspect: 
+            /* inspect:
             if (type === itype) {
                 console.log("values: ", values);
                 console.log(values.map((x) => typeof x.type !== "undefined"));
@@ -257,8 +258,8 @@ function gather(values: { type: string; value: any }[], key: string) {
         {type:'b', value: 1},
     ]
     key = 'b'
-    
-    ... becomes ... 
+
+    ... becomes ...
 
     value = [
         {type:'a', value: 1},
@@ -297,8 +298,8 @@ function gather_all(
         {type:'b', value: 1},
     ]
     singletons = 'a'
-    
-    ... becomes ... 
+
+    ... becomes ...
 
     value = {
         'a': 1,
