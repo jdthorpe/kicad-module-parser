@@ -1354,7 +1354,7 @@ _ "whitespace"
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number
-    = val:$([-+]?  (Real/Fraction/digits)) {
+    = val:$([-+]?  (Exponential/Real/Fraction/digits)) {
         return { type:"number", value:val }
     }
 
@@ -1365,8 +1365,12 @@ number_
 Real
   = val:$((digits("."(digits?))?) / "." digits) {
       return { type:"real", value:val }
-
   }
+
+Exponential
+    = val:$((digits / Real) ("e" / "E") ("+" / "-")? digits) {
+      return { type:"exponential", value:val }
+    }
 
 Fraction
   = n:digits "/" d:digits {
