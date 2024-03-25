@@ -70,7 +70,7 @@ function process_file(filepath: string) {
         data_is_valid = AJV.validate(schema, data) as boolean;
     } catch (err) {
         console.log(chalk.bgRed.black("Something Went Wrong"));
-        console.log("Error:", err.message);
+        console.log("Error:", (err as Error).message);
 
         AJV.errors &&
             AJV.errors.map((e) =>
