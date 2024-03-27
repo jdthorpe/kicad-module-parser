@@ -51,7 +51,7 @@ kicad_symbol_element
     _ { return value; }
 
 exclude_from_sim
-  = "(" _ type:"exclude_from_sim" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"exclude_from_sim" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
@@ -94,12 +94,12 @@ hide_token
 offset = "(" _ type:"offset" _ value:number _ ")" { return { type, value }; }
 
 in_bom
-  = "(" _ type:"in_bom" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"in_bom" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
 on_board
-  = "(" _ type:"on_board" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"on_board" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
