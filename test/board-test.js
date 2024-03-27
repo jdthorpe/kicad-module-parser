@@ -81,6 +81,7 @@ function process_file(filepath) {
         return;
     }
     if (!data_is_valid) {
+        console.log(JSON.stringify(data.value.at(139).value.at(26).value, null, 2));
         console.log(chalk_1["default"].black.bgRed("Data does not follow the schema"), filepath);
         AJV.errors &&
             AJV.errors.map(function (e, i) {

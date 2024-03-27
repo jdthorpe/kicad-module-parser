@@ -5,6 +5,7 @@ board /* parseBOARD_unchecked */
     rest:( val:(
         general /
         host /
+        generator /
         version /
         paper /
         title_block /
@@ -60,7 +61,9 @@ general_array_opt
 paper /* parsePAGE_INFO */
  =  "(" _
         ("page"/"paper") _
+        ('"'/'"')? _
         size:("A0"/"A1"/"A2"/"A3"/"A4"/"A5"/"A"/"B"/"C"/"D") _
+        ('"'/'"')? _
         portrait:("portrait" _ )?
         ")" {
         const value = [
@@ -256,6 +259,7 @@ PCBPLOTPARAMS_NUMERIC
  / "outputformat"
  / "drillshape"
  / "scaleselection"
+ / "svgprecision"
 
 pcbplotparams_flag
     = "(" _ type:PCBPLOTPARAMS_FLAG _ value:pcbplotparams_bool _ ")" { return { type, value } }
@@ -267,7 +271,6 @@ PCBPLOTPARAMS_FLAG
  / "usegerberadvancedattributes"
  / "creategerberjobfile"
  / "svguseinch"
- / "svgprecision"
  / "excludeedgelayer"
  / "plotframeref"
  / "viasonmask"
@@ -873,15 +876,21 @@ pad
         no:(string/symbol)? _
         pad_type:pad_type _
         shape:pad_shape _
+        (locked:locked _)?
         attrs:(pad_attr _)* ")" {
+
+        var values = [
+            { type: "pad_id", value: no },
+            pad_type,
+            shape,
+            ...attrs.map(x => x[0])
+        ]
+
+        if (typeof locked !== "undefined") values.push(locked)
+
         return {
             type: "pad",
-            value: [
-                { type: "pad_id", value:no },
-                pad_type,
-                shape,
-                  ...attrs.map(x => x[0])
-            ]
+            value: values
         }
     }
 

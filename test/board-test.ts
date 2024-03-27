@@ -84,6 +84,7 @@ function process_file(filepath: string) {
     }
 
     if (!data_is_valid) {
+        console.log(JSON.stringify(data.value.at(139).value.at(26).value, null, 2));
         console.log(
             chalk.black.bgRed("Data does not follow the schema"),
             filepath
