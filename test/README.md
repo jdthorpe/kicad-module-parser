@@ -12,6 +12,9 @@ node test/
 pushd data/module
 ./init.sh
 popd
+pushd data/symbols
+./init.sh
+popd
 pushd data/pcb
 ./init.sh
 popd

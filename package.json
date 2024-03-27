@@ -14,11 +14,13 @@
     },
     "license": "MIT",
     "scripts": {
-        "build": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
+        "build": "yarn build:module && yarn build:symbol && yarn build:package",
         "build:module": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
         "build:symbol": "npx pegjs -o src/symbol-parser.js  --allowed-start-rules kicad_symbol_lib ./src/symbol.pegjs",
+        "build:package": "tsc",
+        "build:tests": "tsc -p ./test",
         "watch": "npx nodemon",
-        "test": "node test/"
+        "test": "yarn build:tests && node test/"
     },
     "devDependencies": {
         "@types/argparse": "^2.0.10",

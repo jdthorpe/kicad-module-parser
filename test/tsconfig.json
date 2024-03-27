@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "downlevelIteration": true,
+    "target": "es2021"
+  },
+  "include": ["**/*.ts"],
+}

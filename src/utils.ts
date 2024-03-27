@@ -154,7 +154,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
         case "symbol":
             gather(values, "symbol");
             gather(values, "pin");
-            gather(values, "property");
+            gather(values, "properties");
             gather(values, "arc");
             gather(values, "circle");
             gather(values, "polyline");
@@ -204,6 +204,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                     "version",
                     "generator",
                     "generator_version",
+                    "symbol"
                 ]),
             };
         case "area":

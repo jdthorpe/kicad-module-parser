@@ -17,7 +17,9 @@ version
     }
 
 generator
-  = "(" _ type:"generator" _ value:string _ ")" { return { type, value }; }
+  = "(" _ type:"generator" _ value:(string / symbol) _ ")" {
+      return { type, value };
+    }
 
 generator_version
   = "(" _ type:"generator_version" _ value:string _ ")" {
@@ -51,11 +53,11 @@ kicad_symbol_element
     _ { return value; }
 
 exclude_from_sim
-  = "(" _ type:"exclude_from_sim" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"exclude_from_sim" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
-library_id = value:string { return { type: "library_id", value }; }
+library_id = value:string { return { type: "id", value }; }
 
 power
   = "(" _ type:"power" _ ")" {
@@ -63,8 +65,8 @@ power
     }
 
 extends
-  = "(" _ type:"extends" _ value:library_id _ ")" {
-      return { type, value: [value] };
+  = "(" _ type:"extends" _ value:string _ ")" {
+      return { type, value };
     }
 
 pin_numbers
@@ -87,19 +89,19 @@ hide_token
   = value:"hide" _ {
       return {
         type: "hide",
-        value: { type: "boolean", value: value === "hide" },
+        value: { type: "boolean", value: true },
       };
     }
 
 offset = "(" _ type:"offset" _ value:number _ ")" { return { type, value }; }
 
 in_bom
-  = "(" _ type:"in_bom" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"in_bom" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
 on_board
-  = "(" _ type:"on_board" _ value:("yes" / "no") _ ")" {
+  = "(" _ type:"on_board" _ value:bool _ ")" {
       return { type, value: { type: "boolean", value: value === "yes" } };
     }
 
@@ -112,18 +114,19 @@ property
     _
     value:string
     _
-    at:at
-    _
-    (effects:effects _)?
+    rest:(val:(at / effects / property_id) _ { return val; })+
     ")" {
-      var values = [{ type: "key", value: name }, { type: "value", value }, at];
-
-      if (typeof effects !== "undefined") {
-        value.push(effects);
-      }
-
-      return { type: "property", value: values };
+      return {
+        type: "properties",
+        value: [
+          { type: "key", value: name },
+          { type: "value", value },
+          ...rest,
+        ],
+      };
     }
+
+property_id = "(" _ "id" _ value:number _ ")" { return { type: "id", value }; }
 
 graphic_item
   = arc
@@ -305,7 +308,7 @@ pin_graphic_style
 
 pin_name
   = "(" _ "name" _ value:string _ (effects:effects _)? ")" {
-      var values = [{ type: "name", value }];
+      var values = [{ type: "value", value }];
       if (typeof effects !== "undefined") values.push(effects);
       return {
         type: "pin_name",
@@ -315,7 +318,7 @@ pin_name
 
 pin_number
   = "(" _ "number" _ value:string _ (effects _)? ")" {
-      var values = [{ type: "name", value }];
+      var values = [{ type: "value", value }];
       if (typeof effects !== "undefined") values.push(effects);
       return {
         type: "pin_number",
@@ -399,12 +402,19 @@ fill
     }
 
 effects
-  = "(" _ type:"effects" _ effects:((font / justify / hide) _)* ")" {
+  = "(" _ type:"effects" _ effects:((font / justify / hide / hide_token) _)* ")" {
       return { type, value: effects.map((x) => x[0]) };
     }
 
 font
-  = "(" _ type:"font" _ attrs:((size / thickness / bold / italic) _)* ")" {
+  = "("
+    _
+    type:"font"
+    _
+    attrs:(
+      (face / size / thickness / bold / italic / bold_token / italic_token) _
+    )*
+    ")" {
       return {
         type,
         value: attrs.map((x) => x[0]),
@@ -413,6 +423,8 @@ font
 
 thickness
   = "(" _ type:"thickness" _ value:number _ ")" { return { type, value }; }
+
+face = "(" _ type:"face" _ value:string _ ")" { return { type, value }; }
 
 size
   = "(" _ type:"size" _ width:number _ height:number _ ")" {
@@ -427,7 +439,15 @@ size
 
 italic = "(" _ type:"italic" _ value:bool _ ")" { return { type, value }; }
 
+italic_token
+  = "italic"
+    _ { return { type: "italic", value: { type: "boolean", value: true } }; }
+
 bold = "(" _ type:"bold" _ value:bool _ ")" { return { type, value }; }
+
+bold_token
+  = "bold"
+    _ { return { type: "bold", value: { type: "boolean", value: true } }; }
 
 justify
   = "(" _ type:"justify" _ justify:(JUSTIFY _)* ")" {
