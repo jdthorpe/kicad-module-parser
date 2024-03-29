@@ -1,6 +1,6 @@
 {
     "name": "kicad-to-json",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "main": "index.js",
     "author": "Jason Thorpe",
     "keywords": [
@@ -14,9 +14,13 @@
     },
     "license": "MIT",
     "scripts": {
-        "build": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
+        "build": "yarn build:module && yarn build:symbol && yarn build:package",
+        "build:module": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
+        "build:symbol": "npx pegjs -o src/symbol-parser.js  --allowed-start-rules kicad_symbol_lib ./src/symbol.pegjs",
+        "build:package": "tsc",
+        "build:tests": "tsc -p ./test",
         "watch": "npx nodemon",
-        "test": "node test/"
+        "test": "yarn build:tests && node test/"
     },
     "devDependencies": {
         "@types/argparse": "^2.0.10",
@@ -25,6 +29,8 @@
         "@types/klaw": "^3.0.1",
         "@types/through2": "^2.0.36",
         "pegjs": "^0.10.0",
+        "prettier": "^3.2.5",
+        "prettier-plugin-pegjs": "^2.0.2",
         "typescript": "^4.3.5"
     },
     "dependencies": {
@@ -38,5 +44,8 @@
     },
     "bin": {
         "k2j": "./bin/k2j"
+    },
+    "prettier": {
+        "plugins": ["prettier-plugin-pegjs"]
     }
 }

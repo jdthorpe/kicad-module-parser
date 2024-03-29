@@ -9,19 +9,26 @@ const js_yaml_1 = __importDefault(require("js-yaml"));
 const parse_1 = require("./parse");
 function process_file(args) {
     let filetype;
+    let parser;
     switch (args.file.slice(-10)) {
         case ".kicad_mod":
             filetype = "module";
+            parser = parse_1.parseModuleVerbose;
             break;
         case ".kicad_pcb":
             filetype = "board";
+            parser = parse_1.parseModuleVerbose;
+            break;
+        case ".kicad_sym":
+            filetype = "kicad_symbol_lib";
+            parser = parse_1.parseSymbolVerbose;
             break;
         default:
             throw "Invalid file type. Expected extension '.kicad_mod' or '.kicad_pcb'";
     }
     const mod = fs_extra_1.default.readFileSync(args.file).toString();
     let sdata;
-    sdata = parse_1.parse_verbose(mod, args.format, { startRule: filetype });
+    sdata = parser(mod, args.format, { startRule: filetype });
     if (args.yaml) {
         const outfile = args.output || args.file.slice(0, -10) + ".yaml";
         fs_extra_1.default.writeFileSync(outfile, js_yaml_1.default.dump(sdata, { noCompatMode: true }));

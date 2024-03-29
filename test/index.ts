@@ -5,4 +5,7 @@
     process.stdout.write("Running modules...");
     await require("./module-test").default;
     console.log("DONE");
+    process.stdout.write("Running symbols...");
+    await require("./symbol-test").default;
+    console.log("DONE");
 })();
