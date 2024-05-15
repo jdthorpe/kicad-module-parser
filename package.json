@@ -1,51 +1,59 @@
 {
-    "name": "kicad-to-json",
-    "version": "1.3.0",
-    "main": "index.js",
-    "author": "Jason Thorpe",
-    "keywords": [
-        "kicad",
-        "json",
-        "yaml"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/jdthorpe/kicad-module-parser.git"
-    },
-    "license": "MIT",
-    "scripts": {
-        "build": "yarn build:module && yarn build:symbol && yarn build:package",
-        "build:module": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
-        "build:symbol": "npx pegjs -o src/symbol-parser.js  --allowed-start-rules kicad_symbol_lib ./src/symbol.pegjs",
-        "build:package": "tsc",
-        "build:tests": "tsc -p ./test",
-        "watch": "npx nodemon",
-        "test": "yarn build:tests && node test/"
-    },
-    "devDependencies": {
-        "@types/argparse": "^2.0.10",
-        "@types/fs-extra": "^9.0.1",
-        "@types/js-yaml": "^4.0.2",
-        "@types/klaw": "^3.0.1",
-        "@types/through2": "^2.0.36",
-        "pegjs": "^0.10.0",
-        "prettier": "^3.2.5",
-        "prettier-plugin-pegjs": "^2.0.2",
-        "typescript": "^4.3.5"
-    },
-    "dependencies": {
-        "ajv": "^8.6.2",
-        "argparse": "^2.0.1",
-        "chalk": "^4.1.2",
-        "fs-extra": "^9.0.1",
-        "js-yaml": "^4.1.0",
-        "klaw": "^3.0.0",
-        "through2": "^4.0.2"
-    },
-    "bin": {
-        "k2j": "./bin/k2j"
-    },
-    "prettier": {
-        "plugins": ["prettier-plugin-pegjs"]
-    }
+  "name": "kicad-to-json",
+  "version": "1.3.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "Jason Thorpe",
+  "keywords": [
+    "kicad",
+    "json",
+    "yaml"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdthorpe/kicad-module-parser.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn build:module && yarn build:symbol && yarn build:package",
+    "build:module": "npx pegjs -o src/module-parser.js  --allowed-start-rules module,board ./src/module.pegjs",
+    "build:symbol": "npx pegjs -o src/symbol-parser.js  --allowed-start-rules kicad_symbol_lib ./src/symbol.pegjs",
+    "build:package": "tsup",
+    "build:tests": "tsc -p ./test",
+    "watch": "npx nodemon",
+    "test": "yarn build:tests && node test/"
+  },
+  "devDependencies": {
+    "@types/argparse": "^2.0.10",
+    "@types/fs-extra": "^9.0.1",
+    "@types/js-yaml": "^4.0.2",
+    "@types/klaw": "^3.0.1",
+    "@types/through2": "^2.0.36",
+    "pegjs": "^0.10.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-pegjs": "^2.0.2",
+    "tsup": "8.0.2",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "ajv": "^8.6.2",
+    "argparse": "^2.0.1",
+    "chalk": "^4.1.2",
+    "fs-extra": "^9.0.1",
+    "js-yaml": "^4.1.0",
+    "klaw": "^3.0.0",
+    "through2": "^4.0.2"
+  },
+  "bin": {
+    "k2j": "./bin/k2j"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-pegjs"
+    ]
+  }
 }

@@ -2,7 +2,7 @@ import { parse as _parseModule } from "./module-parser";
 import { parse as _parseSymbol } from "./symbol-parser";
 
 import { post_process } from "./utils";
-import { n_container } from "../types";
+import { n_container } from "./types";
 import chalk from "chalk";
 interface options {
   startRule: "module" | "board";

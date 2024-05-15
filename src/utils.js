@@ -42,7 +42,9 @@ const post_process = (x, long = true) => {
         if (i >= current.value.length) {
             let out;
             if (long &&
-                (current.type === "kicad_pcb" || current.type === "module" || current.type === "kicad_symbol_lib")) {
+                (current.type === "kicad_pcb" ||
+                    current.type === "module" ||
+                    current.type === "kicad_symbol_lib")) {
                 out = { type: current.type, value: values };
             }
             else {
@@ -56,10 +58,10 @@ const post_process = (x, long = true) => {
             }
             [current, i, values] = SI;
             /* inspect:
-            if (current.type === itype) {
-                console.log(`return to ${current.type} ${i} with value:`, out);
-                console.log("from", current.value[i], "\n======");
-            } */
+                  if (current.type === itype) {
+                      console.log(`return to ${current.type} ${i} with value:`, out);
+                      console.log("from", current.value[i], "\n======");
+                  } */
             values.push(out);
             i++;
             continue;
@@ -68,13 +70,13 @@ const post_process = (x, long = true) => {
         verbose && console.log("curent", current);
         verbose && console.log("next", next);
         /* inspect:
-        if (current.type === itype)
-            console.log(`${current.type} i: `, i, next, "\n======");
-            */
+            if (current.type === itype)
+                console.log(`${current.type} i: `, i, next, "\n======");
+                */
         if (Array.isArray(next.value)) {
             /* inspect:
-            if (current.type === itype) console.log("recurse\n>>>");
-            */
+                  if (current.type === itype) console.log("recurse\n>>>");
+                  */
             // recurse
             SI = [current, i, values];
             stack.push(SI);
@@ -164,7 +166,7 @@ function _process(values, type, stack) {
                     "version",
                     "generator",
                     "generator_version",
-                    "symbol"
+                    "symbol",
                 ]),
             };
         case "area":
@@ -209,18 +211,18 @@ function _process(values, type, stack) {
                     .join("/")}/` + type);
             }
             /* inspect:
-            if (type === itype) {
-                console.log("values: ", values);
-                console.log(values.map((x) => typeof x.type !== "undefined"));
-                console.log(values.map((x) => [x.type, x.value]));
-                console.log(
-                    JSON.stringify(
-                        Object.fromEntries(values.map((x) => [x.type, x.value]))
-                    )
-                );
-                console.log("bye");
-                process.exit();
-            }*/
+                  if (type === itype) {
+                      console.log("values: ", values);
+                      console.log(values.map((x) => typeof x.type !== "undefined"));
+                      console.log(values.map((x) => [x.type, x.value]));
+                      console.log(
+                          JSON.stringify(
+                              Object.fromEntries(values.map((x) => [x.type, x.value]))
+                          )
+                      );
+                      console.log("bye");
+                      process.exit();
+                  }*/
             return {
                 type: type,
                 value: Object.fromEntries(values.map((x) => [x.type, x.value])),
@@ -229,22 +231,22 @@ function _process(values, type, stack) {
 }
 function gather(values, key) {
     /*
-    value = [
-        {type:'a', value: 1},
-        {type:'b', value: 1},
-        {type:'c', value: 1},
-        {type:'b', value: 1},
-    ]
-    key = 'b'
-
-    ... becomes ...
-
-    value = [
-        {type:'a', value: 1},
-        {type:'b', value: [1, 1]},
-        {type:'c', value: 1},
-    ]
-    */
+      value = [
+          {type:'a', value: 1},
+          {type:'b', value: 1},
+          {type:'c', value: 1},
+          {type:'b', value: 1},
+      ]
+      key = 'b'
+  
+      ... becomes ...
+  
+      value = [
+          {type:'a', value: 1},
+          {type:'b', value: [1, 1]},
+          {type:'c', value: 1},
+      ]
+      */
     // get indexes of matching elelments (in reverse order)
     var indexes = [];
     for (let [i, x] of values.entries()) {
@@ -264,24 +266,24 @@ function gather(values, key) {
 }
 function gather_all(values, singletons) {
     /*
-
-    NOTE: Modifies `values` in place
-    value = [
-        {type:'a', value: 1},
-        {type:'b', value: 1},
-        {type:'c', value: 1},
-        {type:'b', value: 1},
-    ]
-    singletons = 'a'
-
-    ... becomes ...
-
-    value = {
-        'a': 1,
-        'b': [ 1, 1 ],
-        'c': [ 1 ],
-    }
-    */
+  
+      NOTE: Modifies `values` in place
+      value = [
+          {type:'a', value: 1},
+          {type:'b', value: 1},
+          {type:'c', value: 1},
+          {type:'b', value: 1},
+      ]
+      singletons = 'a'
+  
+      ... becomes ...
+  
+      value = {
+          'a': 1,
+          'b': [ 1, 1 ],
+          'c': [ 1 ],
+      }
+      */
     // get indexes of matching elelments (in reverse order)
     const out = {};
     for (let x of values) {
