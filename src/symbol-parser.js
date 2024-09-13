@@ -134,6 +134,7 @@ peg$SyntaxError.buildMessage = function(expected, found) {
 };
 
 function peg$parse(input, options) {
+  input = input.trim();
   options = options !== void 0 ? options : {};
 
   var peg$FAILED = {},
