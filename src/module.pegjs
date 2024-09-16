@@ -1,10 +1,12 @@
 
 board /* parseBOARD_unchecked */
-    = "(" _ 
-    type: "kicad_pcb" _ 
-    header:header _ 
+    = "(" _
+    type: "kicad_pcb" _
     rest:( val:(
         general /
+        host /
+        generator /
+        version /
         paper /
         title_block /
         board_layers /
@@ -24,9 +26,9 @@ board /* parseBOARD_unchecked */
         arc /
         via /
         zone /
-        target ) _ {return val})*  
+        target ) _ {return val})*
     ")" _ {
-        return {type, value: [...header, ...rest]}
+        return {type, value: rest}
 };
 
 
@@ -35,39 +37,45 @@ board /* parseBOARD_unchecked */
 // --------------------------------------------------
 
 general /* parseGeneralSection */
- =  "(" _ type:"general" _ 
+ =  "(" _ type:"general" _
         options: (general_opt/general_array_opt)*
     ")" {
     return { type,value: options }
  }
- 
+
 general_opt
- = ( "(" _ 
-        type:("thickness"/"drawings"/"tracks"/"zones"/"modules"/"nets"/"links"/"no_connects"/"area") _ 
-        value:number_  
+ = ( "(" _
+        type:("thickness"/"drawings"/"tracks"/"zones"/"modules"/"nets"/"links"/"no_connects"/"area") _
+        value:number_
     ")" _ {
         return {type, value}
     })
 
 general_array_opt
- =  "(" _ 
-        type:("area") _ 
+ =  "(" _
+        type:("area") _
         value:number_*
     ")" _ {return {type, value}}
 
 
 paper /* parsePAGE_INFO */
- =  "(" _ 
-        ("page"/"paper") _ 
-        ((("custom"/"User") _ height:number _ width:number )/symbol) _ 
+ =  "(" _
+        ("page"/"paper") _
+        ('"'/'"')? _
+        size:("A0"/"A1"/"A2"/"A3"/"A4"/"A5"/"A"/"B"/"C"/"D") _
+        ('"'/'"')? _
         portrait:("portrait" _ )?
         ")" {
-    return {type: "page info", value: { type:"string", value:"unsupported" }}
+        const value = [
+            { type: "size", value: {type: "string", value: size } },
+            { type: "portrait", value: { type: "boolean", value: !!portrait } }
+        ]
+    return {type: "page", value}
  }
 
 title_block /* parseTITLE_BLOCK */
- =  "(" _ 
-        type:"title_block" _ 
+ =  "(" _
+        type:"title_block" _
         options: ( "(" _ $("title" / "date"  / "rev"  / "company" / ("comment" _ [0-8])) _ (string/symbol) _ ")" _) *
     ")" {
     return {type, value: options.map(x => ({ type: x[2],value: x[4]}))}
@@ -77,26 +85,26 @@ title_block /* parseTITLE_BLOCK */
 // layers
 // --------------------------------------------------
 
-board_layers  /* parseLayers */ 
- =  "(" _ 
+board_layers  /* parseLayers */
+ =  "(" _
         type:"layers" _
-        value:( v:_board_layer _ {return v})*  
+        value:( v:_board_layer _ {return v})*
     ")"{
         return { type, value }
 }
 
 _board_layer  /* parseLayer */
- =  "(" _ 
-        index:(symbol / number) _ 
-        name:symbol _ 
-        layer_type: (("user" _ value:string {return value})/symbol) _ 
-        hide:("hide" _ )? 
+ =  "(" _
+        index:(symbol / number) _
+        name:symbol _
+        layer_type: (("user" _ value:string {return value})/symbol) _
+        hide:("hide" _ )?
     ")"{
     const value = [
         {type: "index", value: index},
         {type: "name", value: name},
         {type: "layer_type", value: layer_type},
-        {type: "hide", value: { type: "boolean", value: !!hide }} 
+        {type: "hide", value: { type: "boolean", value: !!hide }}
 
         ]
     return { type: "layer", value }
@@ -107,17 +115,18 @@ _board_layer  /* parseLayer */
 // --------------------------------------------------
 
 setup /* parseSetup */
- =  "(" _ 
-    type:"setup" _ 
+ =  "(" _
+    type:"setup" _
     values:(
-        (setup_boardunits / 
-        setup_flag / 
-        setup_array / 
-        setup_hex / 
-        defaults / 
-        unsupported_setup) _ 
-        )* 
-    ")"{ 
+        (setup_boardunits /
+        setup_flag /
+        setup_array /
+        setup_hex /
+        defaults /
+        pcbplotparams /
+        unsupported_setup) _
+        )*
+    ")"{
     return {type, value:values.map(x => x[0])}
  }
 
@@ -167,7 +176,7 @@ setup_hex
  = "(" _ type:"visible_elements" _ value:hex _ ")" { return { type, value } }
 
 setup_array
- = "(" _ type:SETUP_ARRAY _ value:(number _)+ ")" { 
+ = "(" _ type:SETUP_ARRAY _ value:(number _)+ ")" {
      return {type,value: value.map(x => x[0])}
      }
 SETUP_ARRAY
@@ -181,7 +190,7 @@ SETUP_ARRAY
 
 
 defaults /* parseSetup */
- =  "(" _ type:"defaults" _ values:(default_boardunits / default_int / default_text_dims _ )* ")"{ 
+ =  "(" _ type:"defaults" _ values:(default_boardunits / default_int / default_text_dims _ )* ")"{
     return {type, value:values.map(x => x[0])}
 }
 
@@ -205,7 +214,7 @@ DEFAULT_INT
  / "dimension_precision"
 
 default_text_dims
- = "(" _ type:DEFAULT_TEXT_DIMS _ attrs:(( size/thickness/bold/italic) _ )* ")" { 
+ = "(" _ type:DEFAULT_TEXT_DIMS _ attrs:(( size/thickness/bold/italic) _ )* ")" {
     return { type, value: attrs.map(x => x[0]) }
 }
 DEFAULT_TEXT_DIMS
@@ -214,10 +223,79 @@ DEFAULT_TEXT_DIMS
  / "fab_layers_text_dims"
  / "other_layers_text_dims"
 
+pcbplotparams
+ =  "(" _
+    type:"pcbplotparams" _
+     values:(
+        (pcbplotparams_flag /
+        pcbplotparams_numeric /
+        pcbplotparams_layerselection /
+        pcbplotparams_outputdirectory) _
+        )*
+    ")"{
+    return {type, value:values.map(x => x[0])}
+ }
+
+pcbplotparams_layerselection
+    = "(" _ type:"layerselection" _ value:(string/symbol) _ ")" {
+        return { type, value }
+    }
+
+pcbplotparams_outputdirectory
+    = "(" _ type:"outputdirectory" _ value:(string/symbol) _ ")" {
+        return { type, value }
+    }
+
+pcbplotparams_numeric
+    = "(" _ type:PCBPLOTPARAMS_NUMERIC _ value:number _ ")" { return { type, value } }
+
+PCBPLOTPARAMS_NUMERIC
+ = "linewidth"
+ / "mode"
+ / "hpglpennumber"
+ / "hpglpenspeed"
+ / "hpglpendiameter"
+ / "hpglpenoverlay"
+ / "outputformat"
+ / "drillshape"
+ / "scaleselection"
+ / "svgprecision"
+
+pcbplotparams_flag
+    = "(" _ type:PCBPLOTPARAMS_FLAG _ value:pcbplotparams_bool _ ")" { return { type, value } }
+
+PCBPLOTPARAMS_FLAG
+ = "disableapertmacros"
+ / "usegerberextensions"
+ / "usegerberattributes"
+ / "usegerberadvancedattributes"
+ / "creategerberjobfile"
+ / "svguseinch"
+ / "excludeedgelayer"
+ / "plotframeref"
+ / "viasonmask"
+ / "useauxorigin"
+ / "dxfpolygonmode"
+ / "dxfimperialunits"
+ / "dxfusepcbnewfont"
+ / "psnegative"
+ / "psa4output"
+ / "plotreference"
+ / "plotvalue"
+ / "plotinvisibletext"
+ / "plotothertext"
+ / "sketchpadsonfab"
+ / "padsonsilk"
+ / "subtractmaskfromsilk"
+ / "mirror"
+
+pcbplotparams_bool
+  = value:("true" / "false"){ return { type: "boolean", value: value === "true" } }
+
 unsupported_setup
- = "(" _ type:("stackup"/"pcbplotparams") _ (expression _ )* ")" { 
+ = "(" _ type:("stackup") _ (expression _ )* ")" {
      // console.log(`Warning: unsupported setup section ${type}`)
-     return {type,value: { type: "string", value: "unsupported" } } 
+     return {type,value: { type: "string", value: "unsupported" } }
 }
 
 // --------------------------------------------------
@@ -225,7 +303,7 @@ unsupported_setup
 // --------------------------------------------------
 
 net /* parseNETINFO_ITEM */
- =  "(" _ type:"net" _ net_number:digits _ name:(v:(string/symbol) _ {return v})? ")"{ 
+ =  "(" _ type:"net" _ net_number:digits _ name:(v:(string/symbol) _ {return v})? ")"{
      var value = [
          { type: "net_number", value: { type: "string", value: net_number } }
      ]
@@ -235,14 +313,14 @@ net /* parseNETINFO_ITEM */
 }
 
 net_class /* parseNETCLASS */
- =  "(" _ 
-    type:"net_class" _ 
-    name: (string/symbol) _ 
-    description: (string/symbol) _ 
+ =  "(" _
+    type:"net_class" _
+    name: (string/symbol) _
+    description: (string/symbol) _
     options: ( opt:(net_class_symbol / net_class_boardunit) _ { return opt })*
-    ")"{ 
-    return {type, 
-        value: [ 
+    ")"{
+    return {type,
+        value: [
             { type: "name", value: name},
             { type: "description", value: description},
             ...options ]
@@ -266,18 +344,18 @@ NET_CLASS_BOARDUNIT
  / "diff_pair_gap"
 
 dimension /* parseDIMENSION() */
- =  "(" _ 
-        type:"dimension" _ 
-        dimension: number _ 
-        width: width _ 
-        options: ( (layer / tstamp / gr_text / dimension_xy) _ )*")"{ 
+ =  "(" _
+        type:"dimension" _
+        dimension: number _
+        width: width _
+        options: ( (layer / tstamp / gr_text / dimension_xy) _ )*")"{
     return {
-        type , 
+        type ,
         value: [
             { type: "dimension", value: dimension },
             width,
             ...options.map(x => x[0])
-        ], 
+        ],
     }
 }
 
@@ -294,17 +372,17 @@ DIMENSION_XY
  / "arrow2b"
 
 segment /* parseTRACK() */
- =  "(" _ type:"segment" _ value:(v:(start / end / width / net / layer / tstamp / status ) _ { return v } )* ")"{ 
+ =  "(" _ type:"segment" _ value:(v:(start / end / width / net / layer / tstamp / status ) _ { return v } )* ")"{
      return { type, value }
 }
 
 arc /* parseARC() */
- =  "(" _ type:"arc" _ value: (v:(start / mid / end / width / net / layer / tstamp / status ) _ { return v } )* ")"{ 
+ =  "(" _ type:"arc" _ value: (v:(start / mid / end / width / net / layer / tstamp / status ) _ { return v } )* ")"{
      return {type, value }
 }
 
 target /* parsePCB_TARGET() */
- =  "(" _ type:"target" _ value:((target_flag / at / size1 / width / layer / tstamp) _ )* ")"{ 
+ =  "(" _ type:"target" _ value:((target_flag / at / size1 / width / layer / tstamp) _ )* ")"{
      return {type, value: value.map(x => x[0])}
 }
 
@@ -314,15 +392,15 @@ target_flag
  }
 
 
-via  /* parseVIA */ 
- =  "(" _ type:"via" _ value:((via_param / via_flag / at  / size1  / layers / tstamp / status) _ )*  ")"{ 
+via  /* parseVIA */
+ =  "(" _ type:"via" _ value:((via_param / via_flag / at  / size1  / layers / tstamp / status) _ )*  ")"{
     return { type, value: value.map(x => x[0])}
 }
 
 via_flag
  = type:$("blind"/"micro") {
-     return { 
-         type, 
+     return {
+         type,
          value: { type: "boolean", value: true }
     }
  }
@@ -331,7 +409,7 @@ via_param
  =  "(" _
         type:$("zone"/"drill"/"net") _
         value:(v:(number/symbol) _ {return v})
-    ")"{ 
+    ")"{
     return { type, value }
 }
 
@@ -352,8 +430,8 @@ zone  /* parseZONE_CONTAINER */
         zone_keepout /
         polygon /
         fill_segments
-        ) _ { return v })* 
-    ")"{ 
+        ) _ { return v })*
+    ")"{
     return { type, value }
 }
 
@@ -369,35 +447,35 @@ zone_param
                 "priority" /
                 "min_thickness" /
                 "filled_areas_thickness" )
-        _ value:(v:(string/symbol/number) _ {return v}) ")"{ 
+        _ value:(v:(string/symbol/number) _ {return v}) ")"{
             return { type, value }
 }
 
 zone_hatch
- = "(" _ 
-        type:"hatch" _ 
-        style:("none"/"edge"/"full") _ 
-        pitch:number _ 
+ = "(" _
+        type:"hatch" _
+        style:("none"/"edge"/"full") _
+        pitch:number _
     ")" {
-     return { 
-         type, 
-         value: [ 
-             { type: "style", value: { type: "string", value: style } }, 
-             { type: "pitch", value: pitch }, 
+     return {
+         type,
+         value: [
+             { type: "style", value: { type: "string", value: style } },
+             { type: "pitch", value: pitch },
              ] }
  }
 
 zone_fill
-    = "(" _ 
+    = "(" _
         type:"fill" _
-        filled:("yes" _ )? 
+        filled:("yes" _ )?
         value: ( (fill_options / fill_mode / fill_smoothing) _ )*
     ")"
     {
         value = value.map(x => x[0])
-        if(filled) 
+        if(filled)
             value.push({ type:"filled", value: { type: "boolean", value: true } })
-        else 
+        else
             value.push({ type:"filled", value: { type: "boolean", value: false }})
         return {type, value}
 }
@@ -406,35 +484,35 @@ fill_mode = "(" _ type:"mode" _ value:("polygon" / "hatch" / "segment") _ ")" {
     return { type, value: { type: "string", value } }
 }
 
-fill_smoothing = "(" _ type:"smoothing" _ value:("none" / "chamfer" / "fillet") _ ")" { 
+fill_smoothing = "(" _ type:"smoothing" _ value:("none" / "chamfer" / "fillet") _ ")" {
     return { type, value: { type: "string", value } }
 }
 
-fill_options 
-  =  "(" _ 
-    type:( 
-        "hatch_thickness" / 
-        "hatch_gap" / 
-        "hatch_orientation" / 
-        "hatch_smoothing_level" / 
-        "hatch_smoothing_value" / 
-        "arc_segments" / 
-        "thermal_gap" / 
-        "thermal_bridge_width" / 
-        "radius" 
-        ) _ 
-        value:number _ 
+fill_options
+  =  "(" _
+    type:(
+        "hatch_thickness" /
+        "hatch_gap" /
+        "hatch_orientation" /
+        "hatch_smoothing_level" /
+        "hatch_smoothing_value" /
+        "arc_segments" /
+        "thermal_gap" /
+        "thermal_bridge_width" /
+        "radius"
+        ) _
+        value:number _
         ")"{
       return { type, value }
   }
 
-zone_keepout 
- = "(" _ 
-        type:"keepout" _ 
-        value: ( "(" _ 
+zone_keepout
+ = "(" _
+        type:"keepout" _
+        value: ( "(" _
             t:("tracks"/"vias"/"copperpour"/"pads"/"footprints") _
             v:("allowed"/"not_allowed") _
-        ")" _ 
+        ")" _
         { return { type: t, value: { type: "string", value: v } } } )*
     ")" {
     return { type, value }
@@ -443,41 +521,65 @@ zone_keepout
 zone_connect_pads
     = "(" _
         type: "connect_pads" _
-        connection:( v:("yes"/"no"/"thru_hole_only") _ { return { type: "string", value: v } })? 
+        connection:( v:("yes"/"no"/"thru_hole_only") _ { return { type: "string", value: v } })?
         clearance:("(" _ "clearance" _ c:number _ ")" _ { return c })?
     ")" {
     var value = []
     if(connection)
-        value.push({ type: "connection", value: connection }) 
+        value.push({ type: "connection", value: connection })
     if(clearance)
-        value.push({ type: "clearance", value: clearance }) 
+        value.push({ type: "clearance", value: clearance })
     return { type, value }
 }
 
+generator
+    = "(" _
+        type:"generator" _
+        value:symbol _
+        ")" {
+            return { type, value }
+        }
 
-header /* parseHeader */ 
-  =  version:(header_version _ )?
-        "(" _ symbol _ (string/symbol) _ (string/symbol _)? ")"
+host
+ = "(" _
+        "host" _
+        application:symbol _
+        version:(string/symbol) _
+        ")" {
+        const value = [
+            { type: "application", value: application},
+            { type: "version", value: version}
+        ]
+
+    return { type: "host", value }
+}
+
+header /* parseHeader */
+  =  "(" _ generator:symbol _ layer:(string/symbol) _ attr:(string/symbol _)? ")"
     {
-    var out = []
-    if(version)
-        out.push(version[0])
-    return out
-};
+        return {
+            type: "header",
+            value: {
+                generator: { type: "string", value: generator },
+                layer: { type: "string", value: layer },
+                attr: { type: "string", value: attr }
+            }
+        };
+    };
 
-header_version
- = "(" _ 
-    type:"version" _ 
-    value:digits _ 
-    ")" {
-        return { type, value: { type:"number", value } }
-    }
+version
+    = "(" _
+        type:"version" _
+        value:digits _
+        ")" {
+            return { type, value: { type:"number", value } }
+        }
 
-module  /* parseMODULE_unchecked */ 
-    = _  "(" _ 
-            type:("footprint"/"module") _ 
-            value:(string/symbol) _ 
-            contents:( module_contents _ )* 
+module  /* parseMODULE_unchecked */
+    = _  "(" _
+            type:("footprint"/"module") _
+            value:(string/symbol) _
+            contents:( module_contents _ )*
         ")" _  {
         return {
             type: "module",
@@ -490,15 +592,17 @@ module  /* parseMODULE_unchecked */
 
 module_contents
     = version
+    / generator
+    / module_property
     / locked
-    / placed 
+    / placed
     / layer
-    / tedit 
+    / tedit
     / tstamp
     / at
     / descr
     / tags
-    / path 
+    / path
     / common_numeric // / solder_mask_margin / solder_paste_margin / solder_paste_ratio / clearance / thermal_width / thermal_gap
     / common_int // / autoplace_cost90 / autoplace_cost180 / zone_connect
     / module_attr // T_attr
@@ -511,28 +615,27 @@ module_contents
     / fp_poly
     / pad
     / model
-    / zone; 
+    / zone;
 
 
-version = "(" _ type: "version" _ value:symbol _ ")" { return { type, value }}
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
 placed  = "placed"{ return { type: "placed", value: { type: "boolean", value: true }}}
 
 // ----------------------------------------
 // ----------------------------------------
 
-// layer = "(" _ "layer" _ layers:((LAYER / symbol) _)* ")" { 
-//     return { 
-//         type:"layer", 
+// layer = "(" _ "layer" _ layers:((LAYER / symbol) _)* ")" {
+//     return {
+//         type:"layer",
 //         value:layers.map(x => x[0])
 //     }
 // }
 
-layer = "(" _ type: "layer" _ value:(LAYER / symbol) _ ")" { 
+layer = "(" _ type: "layer" _ "\""? value:(LAYER / symbol) "\""? _ ")" {
     return { type, value }
 }
 
-_LAYER  
+_LAYER
     = value:("B.Adhes"
      /"F.Adhes"
      /"B.Paste"
@@ -551,10 +654,10 @@ _LAYER
      /"Eco2.User"
      /"Edge.Cuts"
      ) {
-        return { type: "string", value } 
+        return { type: "string", value }
     }
 
-LAYER = 
+LAYER =
     _LAYER / CU_LAYER
 
 
@@ -565,11 +668,11 @@ LAYER =
 tedit = "(" _ "tedit" _  tedit:hex _ ")" { return { type:"tedit", value:tedit } }
 
 tstamp = "(" _ "tstamp" _  tstamp:(string/symbol) _ ")" { // TODO: (string/symbol) is probably wrong
-    return { 
-        type:"tstamp", 
-        value:tstamp 
-    } 
-} 
+    return {
+        type:"tstamp",
+        value:tstamp
+    }
+}
 
 // ------------------------------
 // `at` (with effects)
@@ -580,23 +683,23 @@ effects
         return { type, value: effects.map(x => x[0]) }
     }
 
-font 
+font
     = "(" _ type:"font" _ attrs:(( size/thickness/bold/italic) _ )* ")" {
-        return { 
-            type, 
-            value: attrs.map(x => x[0]) 
+        return {
+            type,
+            value: attrs.map(x => x[0])
         }
     }
 
-thickness 
-    = "(" _ type:"thickness" _ value:number _ ")" { 
+thickness
+    = "(" _ type:"thickness" _ value:number _ ")" {
         return { type, value }
     }
 
 bold = type:"bold" { return { type, value: { type: "boolean", value: true } }}
 italic = type:"italic" { return { type, value: { type: "boolean", value: true } }}
 
-justify = "(" _ type:"justify" _ justify: (JUSTIFY _ )* ")" { 
+justify = "(" _ type:"justify" _ justify: (JUSTIFY _ )* ")" {
     return { type, value: justify.map(x => x[0]) }
 }
 
@@ -615,13 +718,13 @@ hide = type:"hide" { return { type, value:{ type: "boolean", value: true } }}
 // more module attributes
 // ----------------------------------------
 
-descr = "(" _ type:"descr" _ value:(string/symbol) _ ")" { 
+descr = "(" _ type:"descr" _ value:(string/symbol) _ ")" {
     return { type, value } // TODO: symbols is probably wrong
-    } 
-tags = "(" _ type:"tags" _ value:(array/string/symbol/number) _ ")" { 
+    }
+tags = "(" _ type:"tags" _ value:(array/string/symbol/number) _ ")" {
     return { type, value }
     }
-path = "(" _ type:"path" _ value:(string/symbol/number) _ ")" { 
+path = "(" _ type:"path" _ value:(string/symbol/number) _ ")" {
     return { type, value }
     }
 
@@ -645,12 +748,23 @@ COMMON_INT
     / "autoplace_cost90"
     / "autoplace_cost180"
 
-module_attr 
-    =   "(" _ "attr" _ value:("smd"/"virtual") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
+module_attr
+    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
         return  {
             type: "module_attribute",
             value: {type:"string",value},
             tags
+        }
+}
+
+module_property
+    =   "(" _ "property" _ key:string _ value:string ")" {
+        return  {
+            type: "module_property",
+            value: [
+                { type: "key", value: key },
+                { type: "value", value }
+            ]
         }
 }
 
@@ -661,27 +775,27 @@ module_attr
 // parseTEXTE_MODULE
 
 fp_text
-    = "("_ 
-        type:"fp_text" _ 
-        text_type:("reference"/"value"/"user") _ 
-        value:(string/symbol/number) _  
-        at:at? _ 
-        attrs:((layer/hide/effects/tstamp) _)* 
+    = "("_
+        type:"fp_text" _
+        text_type:("reference"/"value"/"user") _
+        value:(string/symbol/number) _
+        at:at? _
+        attrs:((layer/hide/effects/tstamp) _)*
         ")" {
-        return { 
-            type, 
-            value: [ 
+        return {
+            type,
+            value: [
                 {type:"text",value},
-                { 
+                {
                     type: "type",
                     value: {
                         type:"string",
                         value:text_type
                         }
                     },
-                 at, 
+                 at,
                  ...attrs.map(x => x[0])
-                 ] 
+                 ]
         }
     }
 
@@ -692,8 +806,12 @@ fp_text
 // --------------------------------------------------
 
 fp_arc
-    =  "(" _ type:"fp_arc" _ center:_start _ end:end _ angle:(angle _ )?   generics:fp_generics  ")" {
-        const out = [ center, end]
+    =  "(" _ type:"fp_arc" _ start:start _ mid:(mid _ )? end:end _ angle:(angle _ )? generics:fp_generics  ")" {
+        const out = [start];
+        if (mid !== null) {
+            out.push(mid[0]);
+        }
+        out.push(end);
         if(angle !== null){
             out.push( angle[0])
         }
@@ -744,7 +862,7 @@ fp_poly
     }
 
 fp_generics
-    = generics:((layer / width / fill / tstamp / status) _ )* {
+    = generics:(( stroke / layer / width / fill / tstamp / status ) _ )* {
         return generics.map(x => x[0])
     }
 
@@ -753,26 +871,30 @@ fp_generics
 // --------------------------------------------------
 
 pad
-    = "(" _ 
-        "pad" _ 
-        no:(string/symbol)? _ 
-        pad_type:pad_type _ 
-        shape:pad_shape _ 
-        locked:("locked" _ )?
-        attrs:(pad_attr _)* ")" { 
-        return { 
+    = "(" _
+        "pad" _
+        no:(string/symbol)? _
+        pad_type:pad_type _
+        shape:pad_shape _
+        (locked:locked _)?
+        attrs:(pad_attr _)* ")" {
+
+        var values = [
+            { type: "pad_id", value: no },
+            pad_type,
+            shape,
+            ...attrs.map(x => x[0])
+        ]
+
+        if (typeof locked !== "undefined") values.push(locked)
+
+        return {
             type: "pad",
-            value: [ 
-                { type: "pad_id", value:no }, 
-                pad_type,
-                shape,
-                { type: "locked", value: { type: "boolean", value: !!locked } }, 
-                  ...attrs.map(x => x[0]) 
-            ]
-        } 
+            value: values
+        }
     }
 
-pad_type 
+pad_type
     = value:("thru_hole"/"np_thru_hole" /"smd"/"connect") {
          return { type: "pad_type", value: { type: "string", value } }
     }
@@ -782,8 +904,12 @@ pad_shape
         return { type: "pad_shape", value: { type: "string", value } }
     }
 
-pad_attr 
+locked_group
+    = "(" _ "locked" _ ")" { return { type: "locked", value: { type: "boolean", value: true }  }}
+
+pad_attr
     = size
+    / locked_group
     / at
     / rect_delta
     / drill
@@ -798,13 +924,13 @@ pad_attr
     / primitives;
 
 chamfer
- = "(" _ 
-    type:"chamfer" _ 
+ = "(" _
+    type:"chamfer" _
     value:(value:("top_left" /
                 "top_right" /
                 "bottom_left" /
                 "bottom_right"
-                ) _ {return { type: "string", value }})+ 
+                ) _ {return { type: "string", value }})+
     ")" {
         return {type,value}
     }
@@ -812,39 +938,39 @@ chamfer
 
 
 
-size1 
-    = "(" _ type:"size" _ value:number _ ")" { 
-        return { type, value } 
+size1
+    = "(" _ type:"size" _ value:number _ ")" {
+        return { type, value }
     }
 
 
-size 
-    = "(" _ type:"size" _ width:number _ height:number _ ")" { 
-        return { 
-           type, 
-            value:  [ 
+size
+    = "(" _ type:"size" _ width:number _ height:number _ ")" {
+        return {
+           type,
+            value:  [
                 { type: "height", value: height },
                 { type: "width", value: width },
-                ] 
-            } 
+                ]
+            }
     }
 
-at 
-    = "(" _ type:"at" _ x:number _ y:number _ angle:(number _)? unlocked:("unlocked" _)?")" { 
+at
+    = "(" _ type:"at" _ x:number _ y:number _ angle:(number _)? unlocked:("unlocked" _)?")" {
         var value = [
-            { type: "x", value:x }, 
-            { type: "y", value:y }, 
+            { type: "x", value:x },
+            { type: "y", value:y },
             { type: "unlocked", value: { type: "boolean", value: !!unlocked } },
         ]
-        if(angle !== null) value.push( { type: "angle", value:angle[0] } ) 
-        return { type, value } 
+        if(angle !== null) value.push( { type: "angle", value:angle[0] } )
+        return { type, value }
     }
 
-rect_delta 
+rect_delta
     = "(" _ type:"rect_delta" _ width:number _ height:number _ ")" {
-        return { 
-                type, 
-                value: [ 
+        return {
+                type,
+                value: [
                         { type:"width", value:width },
                         { type:"height", value:height },
                     ]
@@ -858,7 +984,7 @@ rect_delta
 drill
     = "(" _ type:"drill" _ attrs:((oval/number/offset) _ ) * ")" {
 
-        var height,width 
+        var height,width
         var value = []
         for(const ATTR of attrs){
             var attr = ATTR[0]
@@ -884,7 +1010,7 @@ drill
 
 oval =  type:"oval" { return { type, value: { type: "boolean", value: true } } }
 offset = "(" _ type:"offset" _ x:number _ y:number _ ")" {
-    return { 
+    return {
         type,
         value: [
             { type: "x", value: x },
@@ -896,9 +1022,9 @@ offset = "(" _ type:"offset" _ x:number _ y:number _ ")" {
 
 
 // parseBoardItemLayersAsMask
-layers 
-    = "(" _ type:"layers" _ value:(val:(LAYERS/string/symbol) _ {return val})*  ")" { 
-        return { type, value } 
+layers
+    = "(" _ type:"layers" _ value:(val:(LAYERS/string/symbol) _ {return val})*  ")" {
+        return { type, value }
     }
 
 // --------------------------------------------------
@@ -916,18 +1042,18 @@ PAD_NUMERIC
 // pad options
 // --------------------------------------------------
 
-pad_options  /* parseD_PAD_option */ 
+pad_options  /* parseD_PAD_option */
     = "(" _ type:"options" _ value:(val:(option_anchor/option_clearance) _ {return val})*  ")" {
         return { type, value }
     }
 
 option_anchor
-    = "(" _ type:"anchor" _ value:("circle"/"rect") _ ")" { 
+    = "(" _ type:"anchor" _ value:("circle"/"rect") _ ")" {
         return { type, value: { type: "string", value: value}}
     }
 
-option_clearance 
-    = "(" _ type:"clearance" _ value:("outline"/"convexhull") _ ")" { 
+option_clearance
+    = "(" _ type:"clearance" _ value:("outline"/"convexhull") _ ")" {
         return { type, value: { type: "string", value } }
     }
 
@@ -935,17 +1061,17 @@ option_clearance
 // pad primitives
 // --------------------------------------------------
 
-primitives 
+primitives
     = "(" _ type:"primitives" _ value:( val:primitive_shape _  { return val })* ")" {
         return { type, value }
     }
 
 primitive_shape
-    = gr_arc 
-    / gr_line 
-    / gr_rect 
-    / gr_circle 
-    / gr_poly 
+    = gr_arc
+    / gr_line
+    / gr_rect
+    / gr_circle
+    / gr_poly
     / gr_curve ;
 
 gr_arc
@@ -1018,15 +1144,15 @@ gr_poly
     }
 
 gr_text
- = "(" _ 
-    type:"gr_text" _ 
-    text: (string / symbol) _ 
-    at:at _ 
-    options:( (layer  / tstamp / effects) _ ) *  
+ = "(" _
+    type:"gr_text" _
+    text: (string / symbol) _
+    at:at _
+    options:( (layer  / tstamp / effects) _ ) *
     ")" {
 
      const value  = [
-         {type: "text", value: text}, 
+         {type: "text", value: text},
          at,
          ...options.map(x => x[0])
          ]
@@ -1039,36 +1165,65 @@ gr_generics
         return generics.map(x => x[0])
     }
 
-status = "(" _ type:"status" _  value:hex _ ")" { 
-    return { type, value } 
+status = "(" _ type:"status" _  value:hex _ ")" {
+    return { type, value }
 }
 
-fill 
+fill
     = "(" _ type:"fill" _  value:symbol _ ")" {
-        return { type, value } 
+        return { type, value }
     }
 
-width 
+stroke
+    = "(" _ type:"stroke" _  width:width _ stroke_type:stroke_type _ ")" {
+        return { type,
+                value:
+                [
+                    width,
+                    stroke_type,
+                ]
+         }
+    }
+
+stroke_type
+    = "(" _ type:"type" _  value:STROKE_TYPES _ ")" {
+        return { type, value }
+    }
+
+STROKE_TYPES
+    = value:(
+        "dash" /
+        "dash_dot" /
+        "dash_dot_dot" /
+        "dot" /
+        "default" /
+        "solid"
+    ) {
+        return { type: "string", value}
+    }
+
+
+width
     = "(" _ type:"width" _  value:number _ ")" {
-        return { type, value } 
+        return { type, value }
     }
 
-angle 
+angle
     = "(" _ type:"angle" _ value:number _ ")" {
         return { type, value }
     }
 
-mid 
-    = "(" _ type:"mid" _ value:x_y _ ")" { 
+mid
+    = "(" _ type:"mid" _ value:x_y _ ")" {
         return { type, value }
 }
 
-start 
-    = "(" _ type:"start" _ value:x_y _ ")" { 
+start
+    = "(" _ type:"start" _ value:x_y _ ")" {
         return { type, value }
 }
 
-x_y = 
+x_y =
   x:number _ y:number {
       return [
                 {type: "x", value:x},
@@ -1077,36 +1232,36 @@ x_y =
 
   }
 
-_start 
-    = "(" _ type: ("start" / "center") _ value:x_y _ ")" { 
+_start
+    = "(" _ type: ("start" / "center" ) _ value:x_y _ ")" {
         return { type, value } // yep, "center"
 }
-center 
-    = "(" _ type:"center" _ value:x_y _ ")" {
+center
+    = "(" _ type: ( "center" ) _ value:x_y _ ")" {
         return { type, value }
     }
-end 
+end
     = "(" _ type:"end" _ value:x_y _ ")" {
         return { type, value }
     }
-pts 
+pts
     = "(" _ type:"pts" _ pts:(xy _ )+")" {
         return { type, value: pts.map(x => x[0])}
     }
-xy 
+xy
     = "(" _ type:"xy" _ value:x_y _ ")" {
         return { type, value }
     }
 
 // ----------------------------------------
-// 3d model: 
+// 3d model:
 // ----------------------------------------
 
 model
-    = "(" _ 
-        type:"model" _ 
-        filename:(string/symbol) _   
-        attr:((model_xyz_attr/ hide / opacity)_ )* _ 
+    = "(" _
+        type:"model" _
+        filename:(string/symbol) _
+        attr:((model_xyz_attr/ hide / opacity)_ )* _
         ")" {
         return {
             type,
@@ -1120,24 +1275,24 @@ model
 opacity = "(" _ "opacity" _  value:number _ ")" { return { type:"opacity", value:value } }
 
 model_xyz_attr
- = "(" _ 
-        type:("at"/"offset"/"scale"/"rotate") _ 
-        value:xyz _  
-    ")" { 
-        return { type, value: [ value ]  } 
+ = "(" _
+        type:("at"/"offset"/"scale"/"rotate") _
+        value:xyz _
+    ")" {
+        return { type, value: [ value ]  }
     }
 
-xyz =   "(" _ 
+xyz =   "(" _
             type:"xyz" _
             x:number _
             y:number _
             z:number _
-        ")" { 
+        ")" {
             return { type, value:[
                 {type: "x", value:x},
                 {type: "y", value:y},
                 {type: "z", value:z}
-            ] } 
+            ] }
         }
 
 // --------------------------------------------------
@@ -1181,7 +1336,7 @@ EscapeSequence
 
 sexp
  = _ "(" _ contents:( expression _ )* ")" _ {
-     return { 
+     return {
          type: "sexp",
          value: contents.map(x => x[0])
        }
@@ -1202,7 +1357,7 @@ array
     }
 
 
-symbol 
+symbol
    = value:$([^ ();'\n]+) {
        return {type:"string",value}
 
@@ -1213,21 +1368,25 @@ _ "whitespace"
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number
-    = val:$([-+]?  (Real/Fraction/digits)) {
+    = val:$([-+]?  (Exponential/Real/Fraction/digits)) {
         return { type:"number", value:val }
     }
 
-number_ 
-    = value:number _ 
+number_
+    = value:number _
         { return value }
 
 Real
   = val:$((digits("."(digits?))?) / "." digits) {
       return { type:"real", value:val }
-
   }
-  
-Fraction 
+
+Exponential
+    = val:$((digits / Real) ("e" / "E") ("+" / "-")? digits) {
+      return { type:"exponential", value:val }
+    }
+
+Fraction
   = n:digits "/" d:digits {
       return { type:"fraction", n:n, d:d }
   }
@@ -1239,7 +1398,7 @@ digits = $([0-9]+)
 // <real>::= [<positive_integer>. | <positive_integer>.<positive_integer> | <positive_integer>]
 // <fraction>::= <positive_integer> / <positive_integer>
 
-hex 
+hex
     = value:$([0-9a-fA-F]+) {
         return {type: "hex", value}
 
@@ -1251,16 +1410,16 @@ bool
 cu_layer
     = "(" _ type:"layer" _  value: CU_LAYER _ ")" { return { type, value } }
 
-CU_LAYER  
-    = value:("F.Cu" / "B.Cu" / 
+CU_LAYER
+    = value:("F.Cu" / "B.Cu" /
       "In1.Cu" / "In2.Cu" / "In3.Cu" / "In4.Cu" / "In5.Cu" /
       "In6.Cu" / "In7.Cu" / "In8.Cu" / "In9.Cu" / "In10.Cu" /
       "In11.Cu" / "In12.Cu" / "In13.Cu" / "In14.Cu" / "In15.Cu" /
       "In16.Cu" / "In17.Cu" / "In18.Cu" / "In19.Cu" / "In20.Cu" /
       "In21.Cu" / "In22.Cu" / "In23.Cu" / "In24.Cu" / "In25.Cu" /
-      "In26.Cu" / "In27.Cu" / "In28.Cu" / "In29.Cu" / "In30.Cu" 
+      "In26.Cu" / "In27.Cu" / "In28.Cu" / "In29.Cu" / "In30.Cu"
     ) {
-        return { type: "string", value} 
+        return { type: "string", value}
     }
 
 
@@ -1276,7 +1435,7 @@ LAYER_MASKS
     / "*.CrtYd"
     / "Inner"[1-9]".Cu"
     / "Inner1"[01-4]".Cu") {
-        return { type: "string", value} 
+        return { type: "string", value}
     }
 
 LAYERS

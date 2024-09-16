@@ -70,7 +70,7 @@ function process_file(filepath: string) {
         data_is_valid = AJV.validate(schema, data) as boolean;
     } catch (err) {
         console.log(chalk.bgRed.black("Something Went Wrong"));
-        console.log("Error:", err.message);
+        console.log("Error:", (err as Error).message);
 
         AJV.errors &&
             AJV.errors.map((e) =>
@@ -84,6 +84,7 @@ function process_file(filepath: string) {
     }
 
     if (!data_is_valid) {
+        console.log(JSON.stringify(data.value.at(139).value.at(26).value, null, 2));
         console.log(
             chalk.black.bgRed("Data does not follow the schema"),
             filepath

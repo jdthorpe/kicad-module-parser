@@ -42,7 +42,7 @@ const post_process = (x, long = true) => {
         if (i >= current.value.length) {
             let out;
             if (long &&
-                (current.type === "kicad_pcb" || current.type === "module")) {
+                (current.type === "kicad_pcb" || current.type === "module" || current.type === "kicad_symbol_lib")) {
                 out = { type: current.type, value: values };
             }
             else {
@@ -110,6 +110,22 @@ function _process(values, type, stack) {
         case "net_class":
             gather(values, "add_net");
             break;
+        case "kicad_symbol_lib":
+            gather(values, "symbol");
+            break;
+        case "symbol":
+            gather(values, "symbol");
+            gather(values, "pin");
+            gather(values, "properties");
+            gather(values, "arc");
+            gather(values, "circle");
+            gather(values, "polyline");
+            gather(values, "rectangle");
+            gather(values, "text");
+            break;
+        case "pin":
+            gather(values, "alternate");
+            break;
     }
     // standard processing
     switch (type) {
@@ -122,6 +138,7 @@ function _process(values, type, stack) {
                     "page info",
                     "page",
                     "paper",
+                    "host",
                     "title_block",
                     "setup",
                     "layers",
@@ -138,6 +155,16 @@ function _process(values, type, stack) {
                     "at",
                     "descr",
                     "tags",
+                ]),
+            };
+        case "kicad_symbol_lib":
+            return {
+                type,
+                value: gather_all(values, [
+                    "version",
+                    "generator",
+                    "generator_version",
+                    "symbol"
                 ]),
             };
         case "area":
@@ -160,7 +187,7 @@ function _process(values, type, stack) {
             return { type, value: values.map((x) => x.value) };
         default:
             if (!values.every((x) => typeof x.type !== "undefined")) {
-                console.log(values);
+                console.error(values);
                 throw (`Invalid values array ${stack
                     .map((x) => `${x[0].type}[${x[1]}]`)
                     .join("/")}/` + type);
@@ -209,7 +236,7 @@ function gather(values, key) {
         {type:'b', value: 1},
     ]
     key = 'b'
-    
+
     ... becomes ...
 
     value = [
@@ -246,7 +273,7 @@ function gather_all(values, singletons) {
         {type:'b', value: 1},
     ]
     singletons = 'a'
-    
+
     ... becomes ...
 
     value = {

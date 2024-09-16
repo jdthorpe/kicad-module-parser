@@ -3,9 +3,9 @@
 //--------------------------------------------------
 import {
     n_array,
+    n_container,
     n_named_value,
     n_primitive,
-    n_container,
     node,
 } from "../types";
 
@@ -71,7 +71,7 @@ export const post_process = (x: n_container, long: boolean = true): any => {
             let out;
             if (
                 long &&
-                (current.type === "kicad_pcb" || current.type === "module")
+                (current.type === "kicad_pcb" || current.type === "module" || current.type === "kicad_symbol_lib")
             ) {
                 out = { type: current.type, value: values };
             } else {
@@ -87,7 +87,7 @@ export const post_process = (x: n_container, long: boolean = true): any => {
                 return out;
             }
             [current, i, values] = SI;
-            /* inspect: 
+            /* inspect:
             if (current.type === itype) {
                 console.log(`return to ${current.type} ${i} with value:`, out);
                 console.log("from", current.value[i], "\n======");
@@ -97,15 +97,15 @@ export const post_process = (x: n_container, long: boolean = true): any => {
             continue;
         }
 
-        next = current.value[i];
+        next = current.value[i]!;
         verbose && console.log("curent", current);
         verbose && console.log("next", next);
-        /* inspect: 
-        if (current.type === itype) 
+        /* inspect:
+        if (current.type === itype)
             console.log(`${current.type} i: `, i, next, "\n======");
             */
         if (Array.isArray(next.value)) {
-            /* inspect: 
+            /* inspect:
             if (current.type === itype) console.log("recurse\n>>>");
             */
             // recurse
@@ -148,6 +148,23 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
         case "net_class":
             gather(values, "add_net");
             break;
+        case "kicad_symbol_lib":
+            gather(values, "symbol");
+            break;
+        case "symbol":
+            gather(values, "symbol");
+            gather(values, "pin");
+            gather(values, "properties");
+            gather(values, "arc");
+            gather(values, "circle");
+            gather(values, "polyline");
+            gather(values, "rectangle");
+            gather(values, "text");
+            break;
+        case "pin":
+            gather(values, "alternate");
+            break;
+
     }
 
     // standard processing
@@ -161,6 +178,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                     "page info",
                     "page",
                     "paper",
+                    "host",
                     "title_block",
                     "setup",
                     "layers",
@@ -177,6 +195,16 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                     "at",
                     "descr",
                     "tags",
+                ]),
+            };
+        case "kicad_symbol_lib":
+            return {
+                type,
+                value: gather_all(values, [
+                    "version",
+                    "generator",
+                    "generator_version",
+                    "symbol"
                 ]),
             };
         case "area":
@@ -199,7 +227,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
             return { type, value: values.map((x) => x.value) };
         default:
             if (!values.every((x) => typeof x.type !== "undefined")) {
-                console.log(values);
+                console.error(values);
                 throw (
                     `Invalid values array ${stack
                         .map((x) => `${x[0].type}[${x[1]}]`)
@@ -228,7 +256,7 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
                 );
             }
 
-            /* inspect: 
+            /* inspect:
             if (type === itype) {
                 console.log("values: ", values);
                 console.log(values.map((x) => typeof x.type !== "undefined"));
@@ -257,8 +285,8 @@ function gather(values: { type: string; value: any }[], key: string) {
         {type:'b', value: 1},
     ]
     key = 'b'
-    
-    ... becomes ... 
+
+    ... becomes ...
 
     value = [
         {type:'a', value: 1},
@@ -277,10 +305,10 @@ function gather(values: { type: string; value: any }[], key: string) {
     // splice out the old vals
     const vals = [];
     for (let indx of indexes) {
-        vals.unshift(values.splice(indx, 1)[0].value);
+        vals.unshift(values.splice(indx, 1)[0]!.value);
     }
     // insert the new values array
-    values.splice(indexes[indexes.length - 1], 0, { type: key, value: vals });
+    values.splice(indexes[indexes.length - 1]!, 0, { type: key, value: vals });
 }
 
 function gather_all(
@@ -297,8 +325,8 @@ function gather_all(
         {type:'b', value: 1},
     ]
     singletons = 'a'
-    
-    ... becomes ... 
+
+    ... becomes ...
 
     value = {
         'a': 1,
