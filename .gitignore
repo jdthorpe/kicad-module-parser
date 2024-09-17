@@ -1,4 +1,6 @@
 node_modules
-data
+data/pcb
+data/module
+data/symbols/kicad
 
 .DS_Store
