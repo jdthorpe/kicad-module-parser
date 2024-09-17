@@ -1,5 +1,5 @@
 node_modules
-data/*.json
+data/symbols/custom/*.json
 data/pcb
 data/module
 data/symbols/kicad
