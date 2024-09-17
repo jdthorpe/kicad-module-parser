@@ -393,7 +393,7 @@ function peg$parse(input, options) {
       peg$c173 = peg$literalExpectation("color", false),
       peg$c174 = function(r, g, b, a) {
             return {
-              type,
+              type: "color",
               value: [
                 { type: "r", value: r },
                 { type: "g", value: g },
