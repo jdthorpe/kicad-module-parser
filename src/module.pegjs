@@ -431,7 +431,8 @@ zone  /* parseZONE_CONTAINER */
         zone_keepout /
         polygon /
         fill_segments /
-        uuid
+        uuid /
+        name
         ) _ { return v })*
     ")"{
     return { type, value }
@@ -696,7 +697,7 @@ effects
     }
 
 font
-    = "(" _ type:"font" _ attrs:(( size/thickness/bold/italic) _ )* ")" {
+    = "(" _ type:"font" _ attrs:(( size/thickness/bold_prop/italic_prop) _ )* ")" {
         return {
             type,
             value: attrs.map(x => x[0])
@@ -709,6 +710,15 @@ thickness
     }
 
 bold = type:"bold" { return { type, value: { type: "boolean", value: true } }}
+
+bold_prop = "(" _ type:"bold" _ value:("yes" / "no") _ ")" {
+                  return { type, value:{ type: "boolean", value: value === "yes" } }
+              }
+
+italic_prop = "(" _ type:"italic" _ value:("yes" / "no") _ ")" {
+                  return { type, value:{ type: "boolean", value: value === "yes" } }
+              }
+
 italic = type:"italic" { return { type, value: { type: "boolean", value: true } }}
 
 justify = "(" _ type:"justify" _ justify: (JUSTIFY _ )* ")" {
@@ -728,17 +738,22 @@ hide = type:"hide" { return { type, value:{ type: "boolean", value: true } }}
 
 unlocked
     = "(" _ type:"unlocked" _ value:("yes" / "no") _ ")" {
-        return { type, value:{ type: "boolean", value: true } }
+        return { type, value:{ type: "boolean", value: value === "yes" } }
     }
 
 hide_prop
     = "(" _ type:"hide" _ value:("yes" / "no") _ ")" {
-        return { type, value:{ type: "boolean", value: true } }
+        return { type, value:{ type: "boolean", value: value === "yes" } }
     }
 
 remove_unused_layers
     = "(" _ type:"remove_unused_layers" _ value:("yes" / "no") _ ")" {
-        return { type, value:{ type: "boolean", value: true } }
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+keep_end_layers
+    = "(" _ type:"keep_end_layers" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
     }
 
 // ----------------------------------------
@@ -956,7 +971,8 @@ pad_attr
     / pad_options
     / primitives
     / uuid
-    / remove_unused_layers;
+    / remove_unused_layers
+    / keep_end_layers;
 
 chamfer
  = "(" _
@@ -1205,6 +1221,10 @@ status = "(" _ type:"status" _  value:hex _ ")" {
     return { type, value }
 }
 
+name = "(" _ type:"name" _  value:string _ ")" {
+    return { type, value }
+}
+
 uuid = "(" _ type:"uuid" _  value:string _ ")" {
     return { type, value }
 }
@@ -1301,7 +1321,7 @@ model
     = "(" _
         type:"model" _
         filename:(string/symbol) _
-        attr:((model_xyz_attr/ hide / opacity)_ )* _
+        attr:((model_xyz_attr / hide_prop / opacity)_ )* _
         ")" {
         return {
             type,
