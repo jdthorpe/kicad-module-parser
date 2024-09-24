@@ -1,11 +1,12 @@
 
 board /* parseBOARD_unchecked */
-    = "(" _
+    = _ "whitespace" _ "(" _
     type: "kicad_pcb" _
     rest:( val:(
         general /
         host /
         generator /
+        generator_version /
         version /
         paper /
         title_block /
@@ -429,7 +430,8 @@ zone  /* parseZONE_CONTAINER */
         zone_fill/
         zone_keepout /
         polygon /
-        fill_segments
+        fill_segments /
+        uuid
         ) _ { return v })*
     ")"{
     return { type, value }
@@ -540,6 +542,14 @@ generator
             return { type, value }
         }
 
+generator_version
+    = "(" _
+        type:"generator_version" _
+        value:symbol _
+        ")" {
+            return { type, value }
+        }
+
 host
  = "(" _
         "host" _
@@ -561,6 +571,7 @@ header /* parseHeader */
             type: "header",
             value: {
                 generator: { type: "string", value: generator },
+                generator_version: { type: "string", value: generator_version },
                 layer: { type: "string", value: layer },
                 attr: { type: "string", value: attr }
             }
@@ -593,6 +604,7 @@ module  /* parseMODULE_unchecked */
 module_contents
     = version
     / generator
+    / generator_version
     / module_property
     / locked
     / placed
@@ -714,6 +726,21 @@ JUSTIFY
 
 hide = type:"hide" { return { type, value:{ type: "boolean", value: true } }}
 
+unlocked
+    = "(" _ type:"unlocked" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: true } }
+    }
+
+hide_prop
+    = "(" _ type:"hide" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: true } }
+    }
+
+remove_unused_layers
+    = "(" _ type:"remove_unused_layers" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: true } }
+    }
+
 // ----------------------------------------
 // more module attributes
 // ----------------------------------------
@@ -749,7 +776,7 @@ COMMON_INT
     / "autoplace_cost180"
 
 module_attr
-    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
+    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole"/"exclude_from_pos_files"/"exclude_from_bom") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
         return  {
             type: "module_attribute",
             value: {type:"string",value},
@@ -758,14 +785,20 @@ module_attr
 }
 
 module_property
-    =   "(" _ "property" _ key:string _ value:string ")" {
-        return  {
-            type: "module_property",
-            value: [
-                { type: "key", value: key },
-                { type: "value", value }
-            ]
-        }
+    =   "(" _
+            "property" _
+            key:string _
+            value:string _
+            attrs:((at/layer/uuid/effects/unlocked/hide_prop) _)*
+            ")" {
+            return  {
+                type: "module_property",
+                value: [
+                    { type: "key", value: key },
+                    { type: "value", value },
+                    ...attrs.map(x => x[0])
+                ]
+            }
 }
 
 // --------------------------------------------------
@@ -780,7 +813,7 @@ fp_text
         text_type:("reference"/"value"/"user") _
         value:(string/symbol/number) _
         at:at? _
-        attrs:((layer/hide/effects/tstamp) _)*
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked) _)*
         ")" {
         return {
             type,
@@ -862,7 +895,7 @@ fp_poly
     }
 
 fp_generics
-    = generics:(( stroke / layer / width / fill / tstamp / status ) _ )* {
+    = generics:(( stroke / layer / width / fill / tstamp / status / uuid / unlocked ) _ )* {
         return generics.map(x => x[0])
     }
 
@@ -921,7 +954,9 @@ pad_attr
     / pad_numeric
     / chamfer
     / pad_options
-    / primitives;
+    / primitives
+    / uuid
+    / remove_unused_layers;
 
 chamfer
  = "(" _
@@ -1037,6 +1072,7 @@ PAD_NUMERIC
     = "chamfer_ratio"
     / "roundrect_rratio"
     / "die_length"
+    / "thermal_bridge_angle"
 
 // --------------------------------------------------
 // pad options
@@ -1161,11 +1197,15 @@ gr_text
 }
 
 gr_generics
-    = generics:( (angle /layer / width / fill / tstamp / status )_)* {
+    = generics:( (angle /layer / width / fill / tstamp / status / uuid )_)* {
         return generics.map(x => x[0])
     }
 
 status = "(" _ type:"status" _  value:hex _ ")" {
+    return { type, value }
+}
+
+uuid = "(" _ type:"uuid" _  value:string _ ")" {
     return { type, value }
 }
 

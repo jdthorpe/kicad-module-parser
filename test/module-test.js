@@ -53,7 +53,7 @@ function process_file(filepath) {
     }
     catch (err) {
         console.log(err);
-        console.log(`falied to parse module ${filepath}`);
+        console.log(`failed to parse module ${filepath}`);
         process.exit();
     }
     let data_is_valid = true;
