@@ -1,4 +1,12 @@
 node_modules
-data
+
+data/symbols/kicad
+data/symbols/custom/*.json
+
+data/pcb
+data/pcb/custom/*.json
+
+data/module
+data/module/custom/*.json
 
 .DS_Store

@@ -1,11 +1,12 @@
 
 board /* parseBOARD_unchecked */
-    = "(" _
+    = EmptyLine* "(" _
     type: "kicad_pcb" _
     rest:( val:(
         general /
         host /
         generator /
+        generator_version /
         version /
         paper /
         title_block /
@@ -20,13 +21,13 @@ board /* parseBOARD_unchecked */
         gr_rect /
         gr_poly /
         gr_text /
-        dimension /
         module /
         segment /
         arc /
         via /
         zone /
-        target ) _ {return val})*
+        target /
+        dimension) _ {return val})*
     ")" _ {
         return {type, value: rest}
 };
@@ -429,7 +430,9 @@ zone  /* parseZONE_CONTAINER */
         zone_fill/
         zone_keepout /
         polygon /
-        fill_segments
+        fill_segments /
+        uuid /
+        name
         ) _ { return v })*
     ")"{
     return { type, value }
@@ -540,6 +543,14 @@ generator
             return { type, value }
         }
 
+generator_version
+    = "(" _
+        type:"generator_version" _
+        value:symbol _
+        ")" {
+            return { type, value }
+        }
+
 host
  = "(" _
         "host" _
@@ -561,6 +572,7 @@ header /* parseHeader */
             type: "header",
             value: {
                 generator: { type: "string", value: generator },
+                generator_version: { type: "string", value: generator_version },
                 layer: { type: "string", value: layer },
                 attr: { type: "string", value: attr }
             }
@@ -576,7 +588,7 @@ version
         }
 
 module  /* parseMODULE_unchecked */
-    = _  "(" _
+    = EmptyLine*  "(" _
             type:("footprint"/"module") _
             value:(string/symbol) _
             contents:( module_contents _ )*
@@ -593,6 +605,7 @@ module  /* parseMODULE_unchecked */
 module_contents
     = version
     / generator
+    / generator_version
     / module_property
     / locked
     / placed
@@ -607,6 +620,7 @@ module_contents
     / common_int // / autoplace_cost90 / autoplace_cost180 / zone_connect
     / module_attr // T_attr
     / fp_text
+    / fp_text_box
     / fp_arc
     / fp_circle
     / fp_curve
@@ -615,7 +629,11 @@ module_contents
     / fp_poly
     / pad
     / model
-    / zone;
+    / zone
+    / net_tie_pad_groups
+    / private_layers
+    / dimensions
+    / group;
 
 
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
@@ -684,7 +702,7 @@ effects
     }
 
 font
-    = "(" _ type:"font" _ attrs:(( size/thickness/bold/italic) _ )* ")" {
+    = "(" _ type:"font" _ attrs:(( size/thickness/bold_prop/italic_prop/italic) _ )* _ ")" {
         return {
             type,
             value: attrs.map(x => x[0])
@@ -697,6 +715,15 @@ thickness
     }
 
 bold = type:"bold" { return { type, value: { type: "boolean", value: true } }}
+
+bold_prop = "(" _ type:"bold" _ value:("yes" / "no") _ ")" {
+                  return { type, value:{ type: "boolean", value: value === "yes" } }
+              }
+
+italic_prop = "(" _ type:"italic" _ value:("yes" / "no") _ ")" {
+                  return { type, value:{ type: "boolean", value: value === "yes" } }
+              }
+
 italic = type:"italic" { return { type, value: { type: "boolean", value: true } }}
 
 justify = "(" _ type:"justify" _ justify: (JUSTIFY _ )* ")" {
@@ -713,6 +740,36 @@ JUSTIFY
     };
 
 hide = type:"hide" { return { type, value:{ type: "boolean", value: true } }}
+
+border
+    = "(" _ type:"border" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+unlocked
+    = "(" _ type:"unlocked" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+hide_prop
+    = "(" _ type:"hide" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+remove_unused_layers
+    = "(" _ type:"remove_unused_layers" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+keep_end_layers
+    = "(" _ type:"keep_end_layers" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+pad_property
+    = "(" _ type:"property" _ value:("pad_prop_bga" / "pad_prop_heatsink") _ ")" {
+        return { type, value:{ type: "string", value } }
+    }
 
 // ----------------------------------------
 // more module attributes
@@ -749,7 +806,7 @@ COMMON_INT
     / "autoplace_cost180"
 
 module_attr
-    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
+    =   "(" _ "attr" _ value:("smd"/"virtual"/"through_hole"/"exclude_from_pos_files"/"exclude_from_bom") _ tags:(tag:(array/string/symbol/number) _ {return tag}) * ")" {
         return  {
             type: "module_attribute",
             value: {type:"string",value},
@@ -757,15 +814,42 @@ module_attr
         }
 }
 
-module_property
-    =   "(" _ "property" _ key:string _ value:string ")" {
+private_layers
+    =   "(" _ type:"private_layers" _ value:string _ ")" {
         return  {
-            type: "module_property",
-            value: [
-                { type: "key", value: key },
-                { type: "value", value }
-            ]
+            type,
+            value
         }
+}
+
+net_tie_pad_groups
+    =   "(" _ type:"net_tie_pad_groups" _ value:string_list _ ")" {
+        return  {
+            type,
+            value
+        }
+}
+
+string_list
+    = head:string tail:(_ string)* {
+        return [head, ...tail.map(item => item[1])];
+    }
+
+module_property
+    =   "(" _
+            "property" _
+            key:string _
+            value:string _
+            attrs:((at/layer/uuid/effects/unlocked/hide_prop) _)*
+            ")" {
+            return  {
+                type: "module_property",
+                value: [
+                    { type: "key", value: key },
+                    { type: "value", value },
+                    ...attrs.map(x => x[0])
+                ]
+            }
 }
 
 // --------------------------------------------------
@@ -780,7 +864,7 @@ fp_text
         text_type:("reference"/"value"/"user") _
         value:(string/symbol/number) _
         at:at? _
-        attrs:((layer/hide/effects/tstamp) _)*
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked/hide_prop) _)*
         ")" {
         return {
             type,
@@ -794,6 +878,25 @@ fp_text
                         }
                     },
                  at,
+                 ...attrs.map(x => x[0])
+                 ]
+        }
+    }
+
+fp_text_box
+    = "("_
+        type:"fp_text_box" _
+        value:(string/symbol/number) _
+        start:start _
+        end:end _
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked/border/stroke/hide_prop) _)*
+        ")" {
+        return {
+            type,
+            value: [
+                {type:"text", value},
+                 start,
+                 end,
                  ...attrs.map(x => x[0])
                  ]
         }
@@ -862,7 +965,7 @@ fp_poly
     }
 
 fp_generics
-    = generics:(( stroke / layer / width / fill / tstamp / status ) _ )* {
+    = generics:(( stroke / layer / width / fill / tstamp / status / uuid / unlocked ) _ )* {
         return generics.map(x => x[0])
     }
 
@@ -921,22 +1024,29 @@ pad_attr
     / pad_numeric
     / chamfer
     / pad_options
-    / primitives;
+    / primitives
+    / uuid
+    / remove_unused_layers
+    / keep_end_layers
+    / pad_property;
 
 chamfer
  = "(" _
     type:"chamfer" _
-    value:(value:("top_left" /
-                "top_right" /
-                "bottom_left" /
-                "bottom_right"
-                ) _ {return { type: "string", value }})+
+    value:chamfer_options _
     ")" {
         return {type,value}
     }
 
-
-
+chamfer_options
+    = head:("top_left"/"top_right"/"bottom_left"/"bottom_right")? tail:(_ ("top_left"/"top_right"/"bottom_left"/"bottom_right"))* {
+        return [
+            {type: head, value: {type: "boolean", value: true}},
+            ...tail.map(item => {
+                return {type: item[1], value: {type: "boolean", value: true}}
+            })
+        ];
+    }
 
 size1
     = "(" _ type:"size" _ value:number _ ")" {
@@ -1037,6 +1147,8 @@ PAD_NUMERIC
     = "chamfer_ratio"
     / "roundrect_rratio"
     / "die_length"
+    / "thermal_bridge_angle"
+    / "thermal_bridge_width"
 
 // --------------------------------------------------
 // pad options
@@ -1075,11 +1187,19 @@ primitive_shape
     / gr_curve ;
 
 gr_arc
-    =  "(" _ type:"gr_arc" _ center:_start _ end:end _  generics:gr_generics  ")" {
-        return {
-            type,
-            value:[ center, end, ...generics ]
-        };
+    =  "(" _ type:"gr_arc" _ center:_start _ mid:mid? _ end:end _  generics:gr_generics  ")" {
+
+        if (mid) {
+            return {
+                type,
+                value:[ center, mid, end, ...generics ]
+            };
+        } else {
+            return {
+                type,
+                value:[ center, end, ...generics ]
+            };
+        }
     }
 
 gr_circle
@@ -1148,7 +1268,7 @@ gr_text
     type:"gr_text" _
     text: (string / symbol) _
     at:at _
-    options:( (layer  / tstamp / effects) _ ) *
+    options:( (layer  / tstamp / effects / uuid) _ ) *
     ")" {
 
      const value  = [
@@ -1161,11 +1281,19 @@ gr_text
 }
 
 gr_generics
-    = generics:( (angle /layer / width / fill / tstamp / status )_)* {
+    = generics:( (angle /layer / width / fill / tstamp / status / uuid )_)* {
         return generics.map(x => x[0])
     }
 
 status = "(" _ type:"status" _  value:hex _ ")" {
+    return { type, value }
+}
+
+name = "(" _ type:"name" _  value:string _ ")" {
+    return { type, value }
+}
+
+uuid = "(" _ type:"uuid" _  value:string _ ")" {
     return { type, value }
 }
 
@@ -1244,14 +1372,149 @@ end
     = "(" _ type:"end" _ value:x_y _ ")" {
         return { type, value }
     }
+
 pts
-    = "(" _ type:"pts" _ pts:(xy _ )+")" {
-        return { type, value: pts.map(x => x[0])}
+    = "(" _ type:"pts" _ points:((xy / pointList_arc)_)* _ ")" {
+        return { type, value: points.filter((x) => x).map((x) => {
+            return x[0];
+        }) }
     }
+
+// Rule to parse xy type
 xy
     = "(" _ type:"xy" _ value:x_y _ ")" {
         return { type, value }
     }
+
+// Rule to parse arc type, including start, mid, and end
+pointList_arc
+    = "(" _ type:"arc" _ start:arcPoint _ mid:arcPoint _ end:arcPoint _ ")" {
+        return {
+            type,
+            value: [start, mid, end]
+        }
+    }
+
+// Rule to parse individual arc points (start, mid, end)
+arcPoint
+    = "(" _ type:("start" / "mid" / "end") _ value:x_y _ ")" {
+
+        return { type, value }
+    }
+
+
+// ----------------------------------------
+// dimensions:
+// ----------------------------------------
+
+dimensions
+    = "("_
+        type:"dimension" _
+        options:((dimension_type
+                     / layer
+                     / uuid
+                     / pts
+                     / height
+                     / gr_text
+                     / format
+                     / style) _)*
+        ")" {
+        return {
+            type,
+            value: options.map(x => x[0]) // Only return the actual parsed attributes
+        };
+    }
+
+dimension_type = "(" _ type:"type" _ value:("aligned" / "leader") _ ")" {
+    return { type: "dimension_type", value: { type: "string", value } }
+}
+
+height = "(" _ type:"height" _  value:number _ ")" {
+    return { type, value }
+}
+
+format
+    = "("_
+            type:"format" _
+            options:((prefix/suffix/units/units_format/precision/override_value) _)*
+            ")" {
+            return {
+                type,
+                value: [
+                     ...options.map(x => x[0])
+                     ]
+            }
+        }
+
+prefix = "(" _ type:"prefix" _  value:string _ ")" {
+    return { type, value }
+}
+
+suffix = "(" _ type:"suffix" _  value:string _ ")" {
+    return { type, value }
+}
+
+units = "(" _ type:"units" _  value:number _ ")" {
+    return { type, value }
+}
+
+units_format = "(" _ type:"units_format" _  value:number _ ")" {
+    return { type, value }
+}
+
+precision = "(" _ type:"precision" _  value:number _ ")" {
+    return { type, value }
+}
+
+override_value = "(" _ type:"override_value" _  value:string _ ")" {
+    return { type, value }
+}
+
+style
+    = "("_
+            type:"style" _
+            options:((thickness/arrow_length/text_position_mode/extension_height/extension_offset/text_frame) _)* _
+            value:"keep_text_aligned"? _
+            ")" {
+            return {
+                type,
+                value: [
+                     ...options.map(x => x[0])
+                     ]
+            }
+        }
+
+arrow_length = "(" _ type:"arrow_length" _  value:number _ ")" {
+    return { type, value }
+}
+
+text_position_mode = "(" _ type:"text_position_mode" _  value:number _ ")" {
+    return { type, value }
+}
+
+extension_height = "(" _ type:"extension_height" _  value:number _ ")" {
+    return { type, value }
+}
+
+extension_offset = "(" _ type:"extension_offset" _  value:number _ ")" {
+    return { type, value }
+}
+
+text_frame = "(" _ type:"text_frame" _  value:number _ ")" {
+    return { type, value }
+}
+
+// ----------------------------------------
+// group:
+// ----------------------------------------
+
+group = "(" _ type:"group" _ value:string _ options:((uuid/members) _)* _ ")" {
+    return { type, value }
+}
+
+members = "(" _ type:"members" _ value:string_list _ ")" {
+    return { type, value }
+}
 
 // ----------------------------------------
 // 3d model:
@@ -1261,13 +1524,13 @@ model
     = "(" _
         type:"model" _
         filename:(string/symbol) _
-        attr:((model_xyz_attr/ hide / opacity)_ )* _
+        options:((model_xyz_attr / hide_prop / opacity)_ )* _
         ")" {
         return {
             type,
             value: [
                 {type:"filename",value:filename},
-                ...attr.map(x => x[0])
+                ...options.map(x => x[0])
             ]
         }
     }
@@ -1365,6 +1628,15 @@ symbol
 
 _ "whitespace"
   = [ \t\n\r]*
+
+// Define a rule for matching an empty line (whitespace + newline)
+EmptyLine = (Whitespace? Newline)+
+
+// Define a rule for matching whitespace (spaces or tabs)
+Whitespace = [ \t]+
+
+// Define a rule for matching a newline (CRLF, LF, or CR)
+Newline = "\r\n" / "\n" / "\r"
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number

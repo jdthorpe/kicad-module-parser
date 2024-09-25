@@ -185,6 +185,8 @@ function _process(values, type, stack) {
             return { type, value: values };
         case "pts":
             return { type, value: values.map((x) => x.value) };
+        case "net_tie_pad_groups":
+            return { type, value: values.map((x) => x.value) };
         default:
             if (!values.every((x) => typeof x.type !== "undefined")) {
                 console.error(values);

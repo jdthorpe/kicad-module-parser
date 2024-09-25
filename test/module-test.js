@@ -53,7 +53,7 @@ function process_file(filepath) {
     }
     catch (err) {
         console.log(err);
-        console.log(`falied to parse module ${filepath}`);
+        console.log(`failed to parse module ${filepath}`);
         process.exit();
     }
     let data_is_valid = true;
@@ -88,6 +88,7 @@ function process_file(filepath) {
     }
     catch (err) {
         console.log(chalk_1.default.bgRed.black("Something Went Wrong with post_process"));
+        console.log(err);
         console.log(chalk_1.default.bgRed.white(filepath));
         console.log(data);
         process.exit();

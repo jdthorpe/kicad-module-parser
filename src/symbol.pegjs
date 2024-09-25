@@ -1,5 +1,5 @@
 kicad_symbol_lib
-  = "("
+  = EmptyLine* "("
     _
     type:"kicad_symbol_lib"
     _
@@ -192,10 +192,22 @@ polyline
     _
     stroke_definition:stroke_definition
     _
-    fill:fill
+    fill:fill?
     _
     ")"
-    _ { return { type: "polyline", value: [pts, stroke_definition, fill] }; }
+    _ {
+        if (fill) {
+            return {
+                type: "polyline",
+                value: [pts, stroke_definition, fill]
+                };
+        } else {
+            return {
+                type: "polyline",
+                value: [pts, stroke_definition]
+                };
+        }
+    }
 
 rectangle
   = "("
@@ -384,7 +396,7 @@ stroke_type
     ")" { return { type, value: { type: "string", value } }; }
 
 color
-  = "(" _ "color" _ r:number _ g:number _ b:number _ a:number _ ")" {
+  = "(" _ type:"color" _ r:number _ g:number _ b:number _ a:number _ ")" {
       return {
         type,
         value: [
@@ -519,3 +531,13 @@ digits = $[0-9]+
 symbol = value:$[^ ();'\n]+ { return { type: "string", value }; }
 
 _ "whitespace" = [ \t\n\r]*
+
+// Define a rule for matching an empty line (whitespace + newline)
+EmptyLine = (Whitespace? Newline)+
+
+// Define a rule for matching whitespace (spaces or tabs)
+Whitespace = [ \t]+
+
+// Define a rule for matching a newline (CRLF, LF, or CR)
+Newline = "\r\n" / "\n" / "\r"
+

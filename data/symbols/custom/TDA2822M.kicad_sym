@@ -1,0 +1,215 @@
+
+(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)
+  (symbol "TDA2822M" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+    (property "Reference" "U" (id 0) (at -7.62 11.43 0.0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Value" "TDA2822M" (id 1) (at -7.62 -11.43 0.0)
+      (effects (font (size 1.27 1.27)) (justify top left))
+    )
+    (property "Footprint" "TDA2822M:DIP762W45P254L1092H508Q8" (id 2) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MF" "STMicroelectronics" (id 4) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MAXIMUM_PACKAGE_HEIGHT" "5.08mm" (id 5) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Package" "DIP-8 STMicroelectronics" (id 6) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Price" "None" (id 7) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Check_prices" "https://www.snapeda.com/parts/TDA2822M/STMicroelectronics/view-part/?ref=eda" (id 8) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "STANDARD" "IPC-7351B" (id 9) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "PARTREV" "September 2003" (id 10) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "SnapEDA_Link" "https://www.snapeda.com/parts/TDA2822M/STMicroelectronics/view-part/?ref=snap" (id 11) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MP" "TDA2822M" (id 12) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Description" "\nAmplifier IC 1-Channel (Mono) or 2-Channel (Stereo) Class AB 8-Mini DIP\n" (id 13) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Availability" "In Stock" (id 14) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MANUFACTURER" "STMicroelectronics" (id 15) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (symbol "TDA2822M_0_0"
+      (polyline
+        (pts (xy 0.0 0.0) (xy -1.524 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.524 0.0) (xy -3.556 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -3.556 0.0) (xy -5.08 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -5.08 0.0) (xy -2.54 5.08)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -2.54 5.08) (xy 0.0 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -2.54 5.08) (xy -2.54 7.62)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -2.54 7.62) (xy -7.62 7.62)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -3.556 0.0) (xy -3.556 -1.016)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -3.556 -1.016) (xy -6.604 -1.016)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -6.604 -1.016) (xy -6.604 2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -6.604 2.54) (xy -7.62 2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.524 0.0) (xy -1.524 -2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.524 -2.54) (xy -7.62 -2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 5.08 -5.08) (xy 0.0 -5.08)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 0.0 -5.08) (xy 2.54 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 2.54 0.0) (xy 5.08 -5.08)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -3.556 1.016) (xy -3.556 0.508)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.524 0.508) (xy -1.524 1.016)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.778 0.762) (xy -1.27 0.762)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.556 -4.191) (xy 3.556 -4.699)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 1.6764 -4.1656) (xy 1.6764 -4.6736)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 1.4224 -4.4196) (xy 1.9304 -4.4196)) (stroke (width 0.1524))
+      )
+      (text "A" (at -2.921 1.9558 0)
+        (effects (font (size 0.8128 0.8128)) (justify bottom left))
+      )
+      (text "B" (at 2.159 -2.9718 0)
+        (effects (font (size 0.8128 0.8128)) (justify bottom left))
+      )
+      (polyline
+        (pts (xy 2.5146 -0.1016) (xy 2.5146 2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 2.5146 2.54) (xy 7.62 2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 1.6764 -5.1308) (xy 1.6764 -7.62)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 1.6764 -7.62) (xy 7.62 -7.62)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.6068 -5.1054) (xy 3.6068 -6.3754)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.6068 -6.3754) (xy 6.0706 -6.3754)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 6.0706 -6.3754) (xy 6.0706 -2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 6.0706 -2.54) (xy 7.62 -2.54)) (stroke (width 0.1524))
+      )
+      (rectangle (start -7.62 -10.16) (end 7.62 10.16)
+        (stroke (width 0.254)) (fill (type background))
+      )
+      (pin power_in line (at 12.7 7.62 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "2"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -12.7 2.54 0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "8"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -12.7 -2.54 0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "7"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at 12.7 -2.54 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "5"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at 12.7 -7.62 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "6"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin passive line (at -12.7 -7.62 0) (length 5.08)
+        (name "GND"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "4"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output line (at -12.7 7.62 0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "1"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output line (at 12.7 2.54 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "3"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+  )
+)
