@@ -1371,14 +1371,41 @@ end
     = "(" _ type:"end" _ value:x_y _ ")" {
         return { type, value }
     }
+
 pts
-    = "(" _ type:"pts" _ pts:(xy _ )+")" {
-        return { type, value: pts.map(x => x[0])}
+    = "(" _ type:"pts" _ points:((xy / pointList_arc)_)* _ ")" {
+        return { type, value: points.filter((x) => x).map((x) => {
+            if (x[0].type === "xy") {
+                return x[0];
+            } else {
+                console.log(x)
+                return x[0];
+            }
+        }) }
     }
+
+// Rule to parse xy type
 xy
     = "(" _ type:"xy" _ value:x_y _ ")" {
         return { type, value }
     }
+
+// Rule to parse arc type, including start, mid, and end
+pointList_arc
+    = "(" _ type:"arc" _ start:arcPoint _ mid:arcPoint _ end:arcPoint _ ")" {
+        return {
+            type,
+            value: [start, mid, end]
+        }
+    }
+
+// Rule to parse individual arc points (start, mid, end)
+arcPoint
+    = "(" _ type:("start" / "mid" / "end") _ value:x_y _ ")" {
+
+        return { type, value }
+    }
+
 
 // ----------------------------------------
 // dimensions:
