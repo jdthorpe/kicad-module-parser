@@ -620,6 +620,7 @@ module_contents
     / common_int // / autoplace_cost90 / autoplace_cost180 / zone_connect
     / module_attr // T_attr
     / fp_text
+    / fp_text_box
     / fp_arc
     / fp_circle
     / fp_curve
@@ -628,7 +629,8 @@ module_contents
     / fp_poly
     / pad
     / model
-    / zone;
+    / zone
+    / net_tie_pad_groups;
 
 
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
@@ -736,6 +738,11 @@ JUSTIFY
 
 hide = type:"hide" { return { type, value:{ type: "boolean", value: true } }}
 
+border
+    = "(" _ type:"border" _ value:("yes" / "no") _ ")" {
+        return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
 unlocked
     = "(" _ type:"unlocked" _ value:("yes" / "no") _ ")" {
         return { type, value:{ type: "boolean", value: value === "yes" } }
@@ -754,6 +761,11 @@ remove_unused_layers
 keep_end_layers
     = "(" _ type:"keep_end_layers" _ value:("yes" / "no") _ ")" {
         return { type, value:{ type: "boolean", value: value === "yes" } }
+    }
+
+pad_property
+    = "(" _ type:"property" _ value:("pad_prop_bga" / "pad_prop_heatsink") _ ")" {
+        return { type, value:{ type: "string", value } }
     }
 
 // ----------------------------------------
@@ -799,6 +811,19 @@ module_attr
         }
 }
 
+net_tie_pad_groups
+    =   "(" _ "net_tie_pad_groups" _ value:string_list _ ")" {
+        return  {
+            type: "net_tie_pad_groups",
+            value
+        }
+}
+
+string_list
+    = head:string tail:(_ string)* {
+        return [head, ...tail.map(item => item[1])];
+    }
+
 module_property
     =   "(" _
             "property" _
@@ -842,6 +867,25 @@ fp_text
                         }
                     },
                  at,
+                 ...attrs.map(x => x[0])
+                 ]
+        }
+    }
+
+fp_text_box
+    = "("_
+        type:"fp_text_box" _
+        value:(string/symbol/number) _
+        start:start _
+        end:end _
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked/border/stroke) _)*
+        ")" {
+        return {
+            type,
+            value: [
+                {type:"text", value},
+                 start,
+                 end,
                  ...attrs.map(x => x[0])
                  ]
         }
@@ -972,7 +1016,8 @@ pad_attr
     / primitives
     / uuid
     / remove_unused_layers
-    / keep_end_layers;
+    / keep_end_layers
+    / pad_property;
 
 chamfer
  = "(" _
@@ -1089,6 +1134,7 @@ PAD_NUMERIC
     / "roundrect_rratio"
     / "die_length"
     / "thermal_bridge_angle"
+    / "thermal_bridge_width"
 
 // --------------------------------------------------
 // pad options
@@ -1127,11 +1173,19 @@ primitive_shape
     / gr_curve ;
 
 gr_arc
-    =  "(" _ type:"gr_arc" _ center:_start _ end:end _  generics:gr_generics  ")" {
-        return {
-            type,
-            value:[ center, end, ...generics ]
-        };
+    =  "(" _ type:"gr_arc" _ center:_start _ mid:mid? _ end:end _  generics:gr_generics  ")" {
+
+        if (mid) {
+            return {
+                type,
+                value:[ center, mid, end, ...generics ]
+            };
+        } else {
+            return {
+                type,
+                value:[ center, end, ...generics ]
+            };
+        }
     }
 
 gr_circle

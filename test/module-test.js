@@ -88,6 +88,7 @@ function process_file(filepath) {
     }
     catch (err) {
         console.log(chalk_1.default.bgRed.black("Something Went Wrong with post_process"));
+        console.log(err);
         console.log(chalk_1.default.bgRed.white(filepath));
         console.log(data);
         process.exit();
