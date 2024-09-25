@@ -1032,17 +1032,20 @@ pad_attr
 chamfer
  = "(" _
     type:"chamfer" _
-    value:(value:("top_left" /
-                "top_right" /
-                "bottom_left" /
-                "bottom_right"
-                ) _ {return { type: "string", value }})+
+    value:chamfer_options _
     ")" {
         return {type,value}
     }
 
-
-
+chamfer_options
+    = head:("top_left"/"top_right"/"bottom_left"/"bottom_right")? tail:(_ ("top_left"/"top_right"/"bottom_left"/"bottom_right"))* {
+        return [
+            {type: head, value: {type: "boolean", value: true}},
+            ...tail.map(item => {
+                return {type: item[1], value: {type: "boolean", value: true}}
+            })
+        ];
+    }
 
 size1
     = "(" _ type:"size" _ value:number _ ")" {

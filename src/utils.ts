@@ -225,8 +225,6 @@ function _process(values: any[], type: string, stack: stackitem[]): any {
             return { type, value: values };
         case "pts":
             return { type, value: values.map((x) => x.value) };
-        case "chamfer":
-            return { type, value: values.map((x) => x.value) };
         case "net_tie_pad_groups":
             return { type, value: values.map((x) => x.value) };
         default:
