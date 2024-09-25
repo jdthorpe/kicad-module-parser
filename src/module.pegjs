@@ -26,7 +26,8 @@ board /* parseBOARD_unchecked */
         arc /
         via /
         zone /
-        target ) _ {return val})*
+        target /
+        dimension) _ {return val})*
     ")" _ {
         return {type, value: rest}
 };
@@ -701,7 +702,7 @@ effects
     }
 
 font
-    = "(" _ type:"font" _ attrs:(( size/thickness/bold_prop/italic_prop) _ )* ")" {
+    = "(" _ type:"font" _ attrs:(( size/thickness/bold_prop/italic_prop/italic) _ )* _ ")" {
         return {
             type,
             value: attrs.map(x => x[0])

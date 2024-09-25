@@ -1809,6 +1809,9 @@ function peg$parse(input, options) {
                                                           s8 = peg$parsezone();
                                                           if (s8 === peg$FAILED) {
                                                             s8 = peg$parsetarget();
+                                                            if (s8 === peg$FAILED) {
+                                                              s8 = peg$parsedimension();
+                                                            }
                                                           }
                                                         }
                                                       }
@@ -1896,6 +1899,9 @@ function peg$parse(input, options) {
                                                             s8 = peg$parsezone();
                                                             if (s8 === peg$FAILED) {
                                                               s8 = peg$parsetarget();
+                                                              if (s8 === peg$FAILED) {
+                                                                s8 = peg$parsedimension();
+                                                              }
                                                             }
                                                           }
                                                         }
@@ -9473,6 +9479,9 @@ function peg$parse(input, options) {
                 s7 = peg$parsebold_prop();
                 if (s7 === peg$FAILED) {
                   s7 = peg$parseitalic_prop();
+                  if (s7 === peg$FAILED) {
+                    s7 = peg$parseitalic();
+                  }
                 }
               }
             }
@@ -9499,6 +9508,9 @@ function peg$parse(input, options) {
                   s7 = peg$parsebold_prop();
                   if (s7 === peg$FAILED) {
                     s7 = peg$parseitalic_prop();
+                    if (s7 === peg$FAILED) {
+                      s7 = peg$parseitalic();
+                    }
                   }
                 }
               }
@@ -9517,17 +9529,23 @@ function peg$parse(input, options) {
               }
             }
             if (s5 !== peg$FAILED) {
-              if (input.charCodeAt(peg$currPos) === 41) {
-                s6 = peg$c5;
-                peg$currPos++;
-              } else {
-                s6 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c6); }
-              }
+              s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
-                peg$savedPos = s0;
-                s1 = peg$c500(s3, s5);
-                s0 = s1;
+                if (input.charCodeAt(peg$currPos) === 41) {
+                  s7 = peg$c5;
+                  peg$currPos++;
+                } else {
+                  s7 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c6); }
+                }
+                if (s7 !== peg$FAILED) {
+                  peg$savedPos = s0;
+                  s1 = peg$c500(s3, s5);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
               } else {
                 peg$currPos = s0;
                 s0 = peg$FAILED;

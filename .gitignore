@@ -7,6 +7,6 @@ data/pcb
 data/pcb/custom/*.json
 
 data/module
-
+data/module/custom/*.json
 
 .DS_Store
