@@ -1,6 +1,6 @@
 
 board /* parseBOARD_unchecked */
-    = _ "whitespace" _ "(" _
+    = EmptyLine* "(" _
     type: "kicad_pcb" _
     rest:( val:(
         general /
@@ -587,7 +587,7 @@ version
         }
 
 module  /* parseMODULE_unchecked */
-    = _  "(" _
+    = EmptyLine*  "(" _
             type:("footprint"/"module") _
             value:(string/symbol) _
             contents:( module_contents _ )*
@@ -1627,6 +1627,15 @@ symbol
 
 _ "whitespace"
   = [ \t\n\r]*
+
+// Define a rule for matching an empty line (whitespace + newline)
+EmptyLine = (Whitespace? Newline)+
+
+// Define a rule for matching whitespace (spaces or tabs)
+Whitespace = [ \t]+
+
+// Define a rule for matching a newline (CRLF, LF, or CR)
+Newline = "\r\n" / "\n" / "\r"
 
 // <number>::= [<sign>] [<positive_integer> | <real> | <fraction>]
 number
