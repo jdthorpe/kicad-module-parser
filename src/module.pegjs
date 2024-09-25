@@ -21,7 +21,6 @@ board /* parseBOARD_unchecked */
         gr_rect /
         gr_poly /
         gr_text /
-        dimension /
         module /
         segment /
         arc /
@@ -630,7 +629,9 @@ module_contents
     / pad
     / model
     / zone
-    / net_tie_pad_groups;
+    / net_tie_pad_groups
+    / private_layers
+    / dimensions;
 
 
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
@@ -811,10 +812,18 @@ module_attr
         }
 }
 
-net_tie_pad_groups
-    =   "(" _ "net_tie_pad_groups" _ value:string_list _ ")" {
+private_layers
+    =   "(" _ type:"private_layers" _ value:string _ ")" {
         return  {
-            type: "net_tie_pad_groups",
+            type,
+            value
+        }
+}
+
+net_tie_pad_groups
+    =   "(" _ type:"net_tie_pad_groups" _ value:string_list _ ")" {
+        return  {
+            type,
             value
         }
 }
@@ -853,7 +862,7 @@ fp_text
         text_type:("reference"/"value"/"user") _
         value:(string/symbol/number) _
         at:at? _
-        attrs:((layer/hide/effects/tstamp/uuid/unlocked) _)*
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked/hide_prop) _)*
         ")" {
         return {
             type,
@@ -878,7 +887,7 @@ fp_text_box
         value:(string/symbol/number) _
         start:start _
         end:end _
-        attrs:((layer/hide/effects/tstamp/uuid/unlocked/border/stroke) _)*
+        attrs:((layer/hide/effects/tstamp/uuid/unlocked/border/stroke/hide_prop) _)*
         ")" {
         return {
             type,
@@ -1254,7 +1263,7 @@ gr_text
     type:"gr_text" _
     text: (string / symbol) _
     at:at _
-    options:( (layer  / tstamp / effects) _ ) *
+    options:( (layer  / tstamp / effects / uuid) _ ) *
     ")" {
 
      const value  = [
@@ -1368,6 +1377,108 @@ xy
     }
 
 // ----------------------------------------
+// dimensions:
+// ----------------------------------------
+
+dimensions
+    = "("_
+        type:"dimension" _
+        options:((dimension_type
+                     / layer
+                     / uuid
+                     / pts
+                     / height
+                     / gr_text
+                     / format
+                     / style) _)*
+        ")" {
+        return {
+            type,
+            value: options.map(x => x[0]) // Only return the actual parsed attributes
+        };
+    }
+
+dimension_type = "(" _ type:"type" _ value:("aligned" / "leader") _ ")" {
+    return { type: "dimension_type", value: { type: "string", value } }
+}
+
+height = "(" _ type:"height" _  value:number _ ")" {
+    return { type, value }
+}
+
+format
+    = "("_
+            type:"format" _
+            options:((prefix/suffix/units/units_format/precision/override_value) _)*
+            ")" {
+            return {
+                type,
+                value: [
+                     ...options.map(x => x[0])
+                     ]
+            }
+        }
+
+prefix = "(" _ type:"prefix" _  value:string _ ")" {
+    return { type, value }
+}
+
+suffix = "(" _ type:"suffix" _  value:string _ ")" {
+    return { type, value }
+}
+
+units = "(" _ type:"units" _  value:number _ ")" {
+    return { type, value }
+}
+
+units_format = "(" _ type:"units_format" _  value:number _ ")" {
+    return { type, value }
+}
+
+precision = "(" _ type:"precision" _  value:number _ ")" {
+    return { type, value }
+}
+
+override_value = "(" _ type:"override_value" _  value:string _ ")" {
+    return { type, value }
+}
+
+style
+    = "("_
+            type:"style" _
+            options:((thickness/arrow_length/text_position_mode/extension_height/extension_offset/text_frame) _)* _
+            value:"keep_text_aligned"? _
+            ")" {
+            return {
+                type,
+                value: [
+                    {type:"text", value},
+                     ...options.map(x => x[0])
+                     ]
+            }
+        }
+
+arrow_length = "(" _ type:"arrow_length" _  value:number _ ")" {
+    return { type, value }
+}
+
+text_position_mode = "(" _ type:"text_position_mode" _  value:number _ ")" {
+    return { type, value }
+}
+
+extension_height = "(" _ type:"extension_height" _  value:number _ ")" {
+    return { type, value }
+}
+
+extension_offset = "(" _ type:"extension_offset" _  value:number _ ")" {
+    return { type, value }
+}
+
+text_frame = "(" _ type:"text_frame" _  value:number _ ")" {
+    return { type, value }
+}
+
+// ----------------------------------------
 // 3d model:
 // ----------------------------------------
 
@@ -1375,13 +1486,13 @@ model
     = "(" _
         type:"model" _
         filename:(string/symbol) _
-        attr:((model_xyz_attr / hide_prop / opacity)_ )* _
+        options:((model_xyz_attr / hide_prop / opacity)_ )* _
         ")" {
         return {
             type,
             value: [
                 {type:"filename",value:filename},
-                ...attr.map(x => x[0])
+                ...options.map(x => x[0])
             ]
         }
     }
