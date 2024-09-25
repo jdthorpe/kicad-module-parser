@@ -1375,12 +1375,7 @@ end
 pts
     = "(" _ type:"pts" _ points:((xy / pointList_arc)_)* _ ")" {
         return { type, value: points.filter((x) => x).map((x) => {
-            if (x[0].type === "xy") {
-                return x[0];
-            } else {
-                console.log(x)
-                return x[0];
-            }
+            return x[0];
         }) }
     }
 

@@ -1294,12 +1294,7 @@ function peg$parse(input, options) {
       peg$c739 = peg$literalExpectation("end", false),
       peg$c740 = function(type, points) {
               return { type, value: points.filter((x) => x).map((x) => {
-                  if (x[0].type === "xy") {
-                      return x[0];
-                  } else {
-                      console.log(x)
-                      return x[0];
-                  }
+                  return x[0];
               }) }
           },
       peg$c741 = "xy",
