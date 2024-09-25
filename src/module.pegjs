@@ -631,7 +631,8 @@ module_contents
     / zone
     / net_tie_pad_groups
     / private_layers
-    / dimensions;
+    / dimensions
+    / group;
 
 
 locked  = "locked" { return { type: "locked", value: { type: "boolean", value: true }  }}
@@ -1452,7 +1453,6 @@ style
             return {
                 type,
                 value: [
-                    {type:"text", value},
                      ...options.map(x => x[0])
                      ]
             }
@@ -1475,6 +1475,18 @@ extension_offset = "(" _ type:"extension_offset" _  value:number _ ")" {
 }
 
 text_frame = "(" _ type:"text_frame" _  value:number _ ")" {
+    return { type, value }
+}
+
+// ----------------------------------------
+// group:
+// ----------------------------------------
+
+group = "(" _ type:"group" _ value:string _ options:((uuid/members) _)* _ ")" {
+    return { type, value }
+}
+
+members = "(" _ type:"members" _ value:string_list _ ")" {
     return { type, value }
 }
 
