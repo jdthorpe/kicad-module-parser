@@ -20,7 +20,10 @@
         "build:package": "tsc",
         "build:tests": "tsc -p ./test",
         "watch": "npx nodemon",
-        "test": "yarn build:tests && node test/"
+        "test": "yarn build:tests && node test/",
+        "test:symbols": "yarn build:tests && node test/symbol-test.ts",
+        "test:modules": "yarn build:tests && node test/module-test.ts",
+        "test:boards": "yarn build:tests && node test/board-test.ts"
     },
     "devDependencies": {
         "@types/argparse": "^2.0.10",
